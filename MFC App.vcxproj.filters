@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="MFC App">
+      <UniqueIdentifier>{7bd06350-bd02-4e1c-a012-5c510e053d06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Window">
+      <UniqueIdentifier>{62b5bfdb-b1d3-4e9d-b440-c36b73041333}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Include">
+      <UniqueIdentifier>{01f4d552-0491-4288-870d-b421560b4602}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Icon">
+      <UniqueIdentifier>{34311165-2324-48d0-919f-2bf325c501ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GdiPlus">
+      <UniqueIdentifier>{b3ce8bc1-1515-44d8-b1c5-74f261f81c14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ASSERT">
+      <UniqueIdentifier>{269c41b6-8e57-41f4-8853-ac0529669d3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Log">
+      <UniqueIdentifier>{50a27fd2-2a7b-4b74-b3f3-4403d52f829b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Alghorithms">
+      <UniqueIdentifier>{adedcd5d-8298-449d-9dcf-60906944e45c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MFCResources.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MFCWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCApp.cpp">
+      <Filter>MFC App</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="WindowIcon.ico">
+      <Filter>Resource Files\Icon</Filter>
+    </Image>
+    <Image Include="WindowIcon.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Resource.h">
+      <Filter>Resource Files\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCApp.h">
+      <Filter>MFC App</Filter>
+    </ClInclude>
+    <ClInclude Include="GdiPlus.h">
+      <Filter>GdiPlus</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamic_assert.h">
+      <Filter>ASSERT</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms.h">
+      <Filter>Alghorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorU.h">
+      <Filter>GdiPlus</Filter>
+    </ClInclude>
+    <ClInclude Include="ComTypes.h">
+      <Filter>GdiPlus</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

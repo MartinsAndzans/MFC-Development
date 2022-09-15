@@ -1,0 +1,4 @@
+﻿  MFCWindow.cpp
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+D:\Users\marti\Darbavirsma\MFC GUI\MFC App\gdiplus.h(216,18): warning C4244: 'initializing': conversion from 'float' to 'UINT32', possible loss of data
+  MFC App.vcxproj -> D:\Users\marti\Darbavirsma\MFC GUI\MFC App\x64\Debug\App\MFC App.exe

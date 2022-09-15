@@ -1,0 +1,51 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "results": [],
+      "tool": {
+        "driver": {
+          "name": "PREfast",
+          "fullName": "PREfast Code Analysis",
+          "version": "14.32.31332.0",
+          "informationUri": "https://aka.ms/cpp/ca"
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///d:/users/marti/darbavirsma/mfc gui/mfc app/mfcapp.cpp"
+          },
+          "roles": [
+            "analysisTarget"
+          ],
+          "hashes": {
+            "sha-256": "2051b48d6bc1fc0593f1ff69ecb1cb67c8a333f2ccf33cf76479b9b580f45447"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///d:/users/marti/darbavirsma/mfc gui/mfc app/mfcapp.h"
+          },
+          "hashes": {
+            "sha-256": "db8ff2cfbdd0529caa350b6892ebd8007426e2a96dd334c9a52be48efa9f14f6"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///d:/users/marti/darbavirsma/mfc gui/mfc app/resource.h"
+          },
+          "hashes": {
+            "sha-256": "b44ac269f3e4ef52910e0f58647b66ed47ae7c406743164d42c1e59b1e5a7fe2"
+          }
+        }
+      ]
+    }
+  ]
+}
