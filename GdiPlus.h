@@ -33,6 +33,7 @@
 #include <stdint.h>
 #endif // !__STDINT
 #include "ColorU.h"
+#include "ComTypes.h"
 //====================//
 
 enum HATCHSTYLE : INT {
@@ -108,93 +109,6 @@ private:
 
 };
 
-// # Geometry Vertex #
-struct Vertex2I {
-	
-	Vertex2I() noexcept
-		: x(0), y(0)
-	{ /*...*/ }
-	
-	Vertex2I(int32_t _x, int32_t _y) noexcept
-		: x(_x), y(_y)
-	{ /*...*/ }
-
-	// # Copy Constructor #
-	Vertex2I(const Vertex2I &other) noexcept = default;
-	// # Copy Assigment Operator #
-	Vertex2I& operator=(const Vertex2I &other) noexcept = default;
-
-	bool operator==(const Vertex2I &other) const noexcept {
-		return x == other.x && y == other.y;
-	}
-
-	bool operator!=(const Vertex2I &other) const noexcept {
-		return x != other.x || y != other.y;
-	}
-
-	int32_t x;
-	int32_t y;
-
-};
-
-
-// # Geometry Size #
-struct Size2I {
-
-	Size2I() noexcept
-		: width(0), height(0)
-	{ /*...*/ }
-
-	Size2I(int32_t _width, int32_t _height) noexcept
-		: width(abs(_width)), height(abs(_height))
-	{ /*...*/ }
-
-	// # Copy Constructor #
-	Size2I(const Size2I &other) noexcept = default;
-	// # Copy Assigment Operator #
-	Size2I& operator=(const Size2I &other) noexcept = default;
-
-	bool operator==(const Size2I &other) const noexcept {
-		return width == other.width && height == other.height;
-	}
-
-	bool operator!=(const Size2I &other) const noexcept {
-		return width != other.width || height != other.height;
-	}
-
-	int32_t width;
-	int32_t height;
-
-};
-
-// # Triangle Geometry #
-struct Triangle3I {
-
-	Triangle3I() noexcept = default;
-
-	Triangle3I(const Vertex2I &_Vertex1, const Vertex2I &_Vertex2, const Vertex2I &_Vertex3) noexcept
-		: Vertex1(_Vertex1), Vertex2(_Vertex2), Vertex3(_Vertex3)
-	{ /*...*/ }
-
-	// # Copy Constructor #
-	Triangle3I(const Triangle3I &other) noexcept = default;
-	// # Copy Assigment Operator #
-	Triangle3I& operator=(const Triangle3I &other) noexcept = default;
-
-	bool operator==(const Triangle3I &other) const noexcept {
-		return Vertex1 == other.Vertex1 && Vertex2 == other.Vertex2 && Vertex3 == other.Vertex3;
-	}
-
-	bool operator!=(const Triangle3I &other) const noexcept {
-		return Vertex1 != other.Vertex1 || Vertex2 != other.Vertex2 || Vertex3 != other.Vertex3;
-	}
-
-	Vertex2I Vertex1;
-	Vertex2I Vertex2;
-	Vertex2I Vertex3;
-
-};
-
 // # Image Load Properties #
 enum class LoadMode : UINT16 {
 	LOAD_FROM_FILE,
@@ -213,9 +127,9 @@ struct GdiPlus {
 			
 			ColorU PrevColor = SetDCBrushColor(hdc, strokeColor);
 
-			UINT32 Radius = ceil(strokeWidth / 2.0F);
+			UINT32 Radius = (UINT32)(ceil(strokeWidth / 2.0F));
 			FillEllipse(hdc, lineBegin, Radius, Radius, (HBRUSH)(GetStockObject(DC_BRUSH)));
-
+			
 			SetDCBrushColor(hdc, PrevColor);
 			
 		} else {
@@ -247,7 +161,7 @@ struct GdiPlus {
 			{ Position.x, Position.y + Size.height }
 		};
 
-		BYTE PointTypes[] = {
+		constexpr BYTE PointTypes[] = {
 			PT_MOVETO,
 			PT_LINETO,
 			PT_LINETO,
@@ -282,19 +196,19 @@ struct GdiPlus {
 
 	}
 
-	static void _stdcall DrawTriangle(HDC hdc, const Triangle3I &Triangle,
+	static void _stdcall DrawTriangle(HDC hdc, const std::array<Vertex2I, 3> &Triangle,
 		const ColorU &strokeColor = ColorU::Enum::DarkBlue, UINT32 strokeWidth = 1U) noexcept {
 
 		HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
 		HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
 
 		POINT PointBuffer[] = {
-			{ Triangle.Vertex1.x, Triangle.Vertex1.y },
-			{ Triangle.Vertex2.x, Triangle.Vertex2.y },
-			{ Triangle.Vertex3.x, Triangle.Vertex3.y }
+			Triangle[0],
+			Triangle[1],
+			Triangle[2]
 		};
 
-		BYTE PointTypes[] = {
+		constexpr BYTE PointTypes[] = {
 			PT_MOVETO,
 			PT_LINETO,
 			PT_LINETO | PT_CLOSEFIGURE
@@ -394,7 +308,7 @@ struct GdiPlus {
 
 	}
 
-	static void _stdcall FillTriangle(HDC hdc, const Triangle3I &Triangle, HBRUSH hBrush) noexcept {
+	static void _stdcall FillTriangle(HDC hdc, const std::array<Vertex2I, 3> &Triangle, HBRUSH hBrush) noexcept {
 
 		HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
 
@@ -402,9 +316,9 @@ struct GdiPlus {
 		HGDIOBJ PrevBrush = SelectObject(hdc, hBrush);
 
 		POINT PointBuffer[] = {
-			{ Triangle.Vertex1.x, Triangle.Vertex1.y },
-			{ Triangle.Vertex2.x, Triangle.Vertex2.y },
-			{ Triangle.Vertex3.x, Triangle.Vertex3.y }
+			Triangle[0],
+			Triangle[1],
+			Triangle[2]
 		};
 
 		Polygon(hdc, PointBuffer, ARRAYSIZE(PointBuffer));

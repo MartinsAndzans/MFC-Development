@@ -4,6 +4,7 @@
 /*************************************************
 *                                                *
 * Copyright(c) 2022 Martins Andzans              *
+* Licensed Under MIT License                     *
 *                                                *
 * - In MFC Application                           *
 * - - This Header MUST be Included after <afx.h> *
@@ -24,7 +25,6 @@
 // For Data Serializing
 #include <ostream>
 #include <iomanip>
-//-------------------------
 //-------------------------
 // For "ToString" Method
 #include <string>
@@ -215,6 +215,16 @@ public:
 
 	}
 
+	#if defined(__AFX_H__)
+	CString ToStringT() {
+		#if defined(UNICODE) | defined(_UNICODE)
+		return ToStringW().c_str();
+		#else // !defined(UNICODE) | !defined(_UNICODE)
+		return ToStringA().c_str();
+		#endif // defined(UNICODE) | defined(_UNICODE)
+	}
+	#endif // defined(__AFX_H__)
+
 	COLORREF data(void) const noexcept {
 		return m_rgbColor;
 	}
@@ -238,11 +248,12 @@ std::ostream& operator<<(std::ostream &outStream, const ColorU &crColor) {
 	std::ios SavedState(nullptr);
 	SavedState.copyfmt(outStream);
 	
-	// Output "ColorU" Content in JSON Format
-	outStream << "{ m_rgbColor: 0x"
+	// Output "ColorU" Content in JSON Format 
+	// R"({ "m_rgbColor": "0x{crColor.data()}" })"
+	outStream << "{ \"m_rgbColor\": \"0x"
 		<< std::uppercase << std::setfill('0')
 		<< std::setw(sizeof(crColor.data()) * 2)
-		<< std::hex << crColor.data() << " }";
+		<< std::hex << crColor.data() << "\" }";
 	
 	// Restore Original Stream State
 	outStream.copyfmt(SavedState);
@@ -259,10 +270,11 @@ std::wostream& operator<<(std::wostream &outWStream, const ColorU &crColor) {
 	SavedState.copyfmt(outWStream);
 	
 	// Output "ColorU" Content in JSON Format
-	outWStream << L"{ m_rgbColor: 0x"
+	// LR"({ "m_rgbColor": "0x{crColor.data()}" })"
+	outWStream << L"{ \"m_rgbColor\": \"0x"
 		<< std::uppercase << std::setfill(L'0')
 		<< std::setw(sizeof(crColor.data()) * 2)
-		<< std::hex << crColor.data() << L" }";
+		<< std::hex << crColor.data() << L"\" }";
 
 	// Restore Original Stream State
 	outWStream.copyfmt(SavedState);

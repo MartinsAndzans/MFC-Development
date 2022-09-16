@@ -501,7 +501,7 @@ protected:
 				CString GameOver;
 				GameOver.Format(_T("GAME OVER!\nYour Score: %I64d"), m_Score);
 				this->MessageBox(GameOver, _T("-- GAME OVER --"), MB_ICONINFORMATION | MB_OK);
-				
+
 				m_Score = 0;
 
 				constexpr UINT FPS = 1000 / 60; // * 60 FPS *
@@ -615,7 +615,10 @@ protected:
 
 			WindowDC.StretchBlt(ClientRect.left, ClientRect.top, ClientRect.Width(), ClientRect.Height(), &MemoryDC, 0, 0, m_CanvasSize.cx, m_CanvasSize.cy, SRCCOPY);
 
+			// std::wstring JSON = GateColors[1].ToStringW();
+
 			GdiPlus::DrawTextT(WindowDC, { 4, 4 }, { 50, 20 }, _T("Flappy Bird"), m_Font_SegoeUI, ColorU::Enum::Orange);
+			// GdiPlus::DrawTextT(WindowDC, { 4, 38 }, { 50, 20 }, JSON.c_str(), m_Font_SegoeUI, ColorU::Enum::Orange);
 
 			// DWORD ret = GdiPlus::DrawImageT(*WindowDC, _T("WindowIcon.bmp"), LoadMode::LOAD_FROM_FILE, { 0, 0 }, { 400, 400 });
 			// OutputDebugStringA(Algorithms::GetWINAPIErrorMessage(ret).c_str());
