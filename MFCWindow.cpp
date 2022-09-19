@@ -72,19 +72,20 @@ public:
 
 };
 
-#ifdef MessageBox
+#pragma push_macro("MessageBox")
 #undef MessageBox
-#endif // MessageBox
 
 namespace WinGui {
 	
 	struct MessageBox {
-	
+		
+		// # Message Box Icons #
 		enum class Icon : INT16 { Error, Warning, Information, Question };
+
 		enum class Buttons : INT16 { Ok, OkCancel, RetryCancel, YesNo, YesNoCancel, AbortRetryIgnore };
 		enum class DefaultButton : INT16 { Button1, Button2, Button3 };
 
-		// # Message Box Result #
+		// # Message Box Results #
 		enum class Result : INT16 { Ok, Cancel, Yes, No, Abort, Retry, Ignore, Error };
 
 		//----------------------------------------
@@ -194,8 +195,10 @@ namespace WinGui {
 		private:
 
 			HWND m_hWndParent;
+
 			std::wstring m_Caption;
 			std::wstring m_Message;
+			
 			Icon m_Icon;
 			Buttons m_Buttons;
 			DefaultButton m_DefaultButton;
@@ -203,6 +206,8 @@ namespace WinGui {
 	};
 
 }
+
+#pragma pop_macro("MessageBox")
 
 struct Gate {
 
@@ -388,7 +393,7 @@ protected:
 
 				INT PrevBKMode = ItemDC.SetBkMode(TRANSPARENT);
 				HGDIOBJ PrevFont = ItemDC.SelectObject(m_Font_SegoeUI);
-				COLORREF PrevColor = ItemDC.SetTextColor(ColorU::Enum::Orange);
+				COLORREF PrevColor = ItemDC.SetTextColor(ColorU::Enum::Yellow);
 
 				CSize TextSize;
 				GetTextExtentPoint32(ItemDC, StaticText, StaticText.GetLength(), &TextSize);
@@ -413,13 +418,10 @@ protected:
 
 	afx_msg void OnTimer(UINT_PTR nIDEvent) {
 
-		CRect ClientRect;
-		this->GetClientRect(&ClientRect);
-
 		constexpr INT16 Void = 200, GateWidth = 20, HoleHeight = 60;
 
 		// Spawn Gates
-		if (m_Gates.size() < 20) {
+		if (m_Gates.size() <= 6) {
 			
 			LONG HolePosition = rand() % (m_CanvasSize.cy - HoleHeight) + 10;
 			
@@ -448,28 +450,20 @@ protected:
 		// Move Gates
 		if (Frame % 3 == 0) {
 			
-			INT16 GateSpeed;
-
-			if (m_Score > 20) {
-				GateSpeed = 16;
-			} else {
-				GateSpeed = 10;
-			}
+			INT16 GateSpeed = (m_Score > 20) ? 16 : 10;
 			
 			for (size_t i = 0; i < m_Gates.size(); i++) {
 
 				if (m_Gates[i].rcTop.right < -20) {
 
 					m_Gates.erase(m_Gates.begin() + i);
-					i -= 1;
+					i--;
 					continue;
 
 				}
 
-				INT32 PrevTopX = m_Gates[i].rcTop.left;
-				m_Gates[i].rcTop.MoveToX(PrevTopX - GateSpeed);
-				INT32 PrevBottomX = m_Gates[i].rcBottom.left;
-				m_Gates[i].rcBottom.MoveToX(PrevBottomX - GateSpeed);
+				m_Gates[i].rcTop.OffsetRect(-GateSpeed, 0);
+				m_Gates[i].rcBottom.OffsetRect(-GateSpeed, 0);
 
 			}
 
@@ -593,9 +587,9 @@ protected:
 			GdiPlus::FillRectangle(MemoryDC, { ClientRect.left, ClientRect.top }, { ClientRect.Width(), ClientRect.Height() }, SkyBlueBrush);
 			
 			std::array<ColorU, 3> PlayerColors = {
-				ColorU::Enum::Orange,
 				ColorU::Enum::Yellow,
-				ColorU::Enum::Orange
+				ColorU::Enum::LightYellow,
+				ColorU::Enum::Yellow
 			};
 
 			GdiPlus::FillGradientH(MemoryDC, { m_Player.rcPlayer.left, m_Player.rcPlayer.top }, { m_Player.rcPlayer.Width(), m_Player.rcPlayer.Height() }, PlayerColors);
@@ -617,7 +611,7 @@ protected:
 
 			// std::wstring JSON = GateColors[1].ToStringW();
 
-			GdiPlus::DrawTextT(WindowDC, { 4, 4 }, { 50, 20 }, _T("Flappy Bird"), m_Font_SegoeUI, ColorU::Enum::Orange);
+			GdiPlus::DrawTextT(WindowDC, { 4, 4 }, { 50, 20 }, _T("Flappy Bird"), m_Font_SegoeUI, ColorU::Enum::Yellow);
 			// GdiPlus::DrawTextT(WindowDC, { 4, 38 }, { 50, 20 }, JSON.c_str(), m_Font_SegoeUI, ColorU::Enum::Orange);
 
 			// DWORD ret = GdiPlus::DrawImageT(*WindowDC, _T("WindowIcon.bmp"), LoadMode::LOAD_FROM_FILE, { 0, 0 }, { 400, 400 });

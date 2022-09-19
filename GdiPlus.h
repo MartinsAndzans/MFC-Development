@@ -32,8 +32,8 @@
 #ifndef _STDINT
 #include <stdint.h>
 #endif // !__STDINT
+#include "GraphicsTypes.h"
 #include "ColorU.h"
-#include "ComTypes.h"
 //====================//
 
 enum HATCHSTYLE : INT {
@@ -126,7 +126,7 @@ struct GdiPlus {
 		if (lineBegin == lineEnd) {
 			
 			ColorU PrevColor = SetDCBrushColor(hdc, strokeColor);
-
+			
 			UINT32 Radius = (UINT32)(ceil(strokeWidth / 2.0F));
 			FillEllipse(hdc, lineBegin, Radius, Radius, (HBRUSH)(GetStockObject(DC_BRUSH)));
 			
@@ -203,9 +203,9 @@ struct GdiPlus {
 		HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
 
 		POINT PointBuffer[] = {
-			Triangle[0],
-			Triangle[1],
-			Triangle[2]
+			{ Triangle[0].x, Triangle[0].y },
+			{ Triangle[1].x, Triangle[1].y },
+			{ Triangle[2].x, Triangle[2].y }
 		};
 
 		constexpr BYTE PointTypes[] = {
@@ -234,6 +234,7 @@ struct GdiPlus {
 		case 1U: // Dot
 
 			SetPixelV(hdc, VertexBuffer[0].x, VertexBuffer[0].y, strokeColor);
+			
 			break;
 
 		case 2U: // Line
@@ -244,13 +245,12 @@ struct GdiPlus {
 
 		default: // Other Geometry
 
-			POINT PointBuffer[VertexBuffer.size()] = { 0 };
-			BYTE PointTypes[VertexBuffer.size()] = { 0 };
+			POINT PointBuffer[ArraySize] = { 0 };
+			BYTE PointTypes[ArraySize] = { 0 };
 
 			for (size_t i = 0; i < ARRAYSIZE(PointBuffer); i++) {
 
-				PointBuffer[i].x = VertexBuffer[i].x;
-				PointBuffer[i].y = VertexBuffer[i].y;
+				PointBuffer[i] = VertexBuffer[i];
 
 				if (i == 0) {
 					PointTypes[i] = PT_MOVETO;
@@ -316,9 +316,9 @@ struct GdiPlus {
 		HGDIOBJ PrevBrush = SelectObject(hdc, hBrush);
 
 		POINT PointBuffer[] = {
-			Triangle[0],
-			Triangle[1],
-			Triangle[2]
+			{ Triangle[0].x, Triangle[0].y },
+			{ Triangle[1].x, Triangle[1].y },
+			{ Triangle[2].x, Triangle[2].y }
 		};
 
 		Polygon(hdc, PointBuffer, ARRAYSIZE(PointBuffer));
@@ -340,11 +340,10 @@ struct GdiPlus {
 
 		INT32 PrevMode = SetPolyFillMode(hdc, WINDING);
 		
-		POINT PointBuffer[VertexBuffer.size()] = {0};
+		POINT PointBuffer[ArraySize] = {0};
 		
-		for (size_t i = 0; i < VertexBuffer.size(); i++) {
-			PointBuffer[i].x = VertexBuffer[i].x;
-			PointBuffer[i].y = VertexBuffer[i].y;
+		for (size_t i = 0; i < ArraySize; i++) {
+			PointBuffer[i] = VertexBuffer[i];
 		}
 
 		Polygon(hdc, PointBuffer, ARRAYSIZE(PointBuffer));

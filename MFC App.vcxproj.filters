@@ -24,14 +24,14 @@
     <Filter Include="GdiPlus">
       <UniqueIdentifier>{b3ce8bc1-1515-44d8-b1c5-74f261f81c14}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ASSERT">
-      <UniqueIdentifier>{269c41b6-8e57-41f4-8853-ac0529669d3a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Log">
       <UniqueIdentifier>{50a27fd2-2a7b-4b74-b3f3-4403d52f829b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Alghorithms">
       <UniqueIdentifier>{adedcd5d-8298-449d-9dcf-60906944e45c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IJType">
+      <UniqueIdentifier>{765509c2-325c-4c63-97f0-412d42fc329c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -65,9 +65,6 @@
     <ClInclude Include="GdiPlus.h">
       <Filter>GdiPlus</Filter>
     </ClInclude>
-    <ClInclude Include="dynamic_assert.h">
-      <Filter>ASSERT</Filter>
-    </ClInclude>
     <ClInclude Include="Algorithms.h">
       <Filter>Alghorithms</Filter>
     </ClInclude>
@@ -77,7 +74,10 @@
     <ClInclude Include="ColorU.h">
       <Filter>GdiPlus</Filter>
     </ClInclude>
-    <ClInclude Include="ComTypes.h">
+    <ClInclude Include="IJType.h">
+      <Filter>IJType</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsTypes.h">
       <Filter>GdiPlus</Filter>
     </ClInclude>
   </ItemGroup>
