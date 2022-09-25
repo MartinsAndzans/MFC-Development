@@ -9,8 +9,8 @@
 *************************************************/
 
 //===== HEADERS ======//
-#include <ostream>
 #include <string>
+#include <ostream>
 #ifndef _STDINT
 #include <stdint.h>
 #endif // !_STDINT
@@ -47,12 +47,12 @@ interface IJType {
 	// Derived Class Content In JSON Format
 	
 	// ASCII Charecter Version
-	virtual std::string ToString() const = 0;
+	virtual std::string ToStringA() const = 0;
 	
 	// Unicode "UTF-16" Charecter Version
-	virtual std::wstring ToWString() const {
+	virtual std::wstring ToStringW() const {
 
-		std::string Format = ToString();
+		std::string Format = ToStringA();
 		const size_t FormatLength = Format.length();
 
 		std::wstring WFormat;
@@ -72,13 +72,13 @@ interface IJType {
 	
 	// # !IMPORTANT! : This Operator Call "ToString" Method #
 	friend std::ostream& operator<<(std::ostream &outStream, const IJType &Object) {
-		outStream << Object.ToString();
+		outStream << Object.ToStringA();
 		return outStream;
 	}
 	
 	// # !IMPORTANT! : This Operator Call "ToWString" Method #
 	friend std::wostream& operator<<(std::wostream &outStream, const IJType &Object) {
-		outStream << Object.ToWString();
+		outStream << Object.ToStringW();
 		return outStream;
 	}
 

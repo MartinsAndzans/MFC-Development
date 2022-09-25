@@ -215,12 +215,12 @@ struct Gate {
 		: rcTop(), rcBottom(), Scored(false)
 	{ /*...*/ }
 
-	Gate(const CRect &_rcTop, const CRect &_rcBottom, bool _Scored)
+	Gate(const Rect4I &_rcTop, const Rect4I &_rcBottom, bool _Scored)
 		: rcTop(_rcTop), rcBottom(_rcBottom), Scored(_Scored)
 	{ /*...*/ }
 
-	CRect rcTop;
-	CRect rcBottom;
+	Rect4I rcTop;
+	Rect4I rcBottom;
 	bool Scored;
 
 };
@@ -236,11 +236,11 @@ struct Player {
 		: rcPlayer(), Fly(DOWN)
 	{ /*...*/ }
 
-	Player(const CRect &_rcPlayer, State _Up)
+	Player(const Rect4I &_rcPlayer, State _Up)
 		: rcPlayer(_rcPlayer), Fly(_Up)
 	{ /*...*/ }
 
-	CRect rcPlayer;
+	Rect4I rcPlayer;
 	State Fly;
 
 };
@@ -289,11 +289,7 @@ private:
 
 	void Reset(void) {
 
-		m_GameOver = false;
-		m_Gates.clear();
 
-		m_Player.Fly = Player::State::DOWN;
-		m_Player.rcPlayer = { m_CanvasSize.cx / 6, m_CanvasSize.cy / 2, m_CanvasSize.cx / 6, m_CanvasSize.cy / 4 };
 
 	}
 
@@ -337,13 +333,15 @@ public:
 		this->SetIcon(hWindowIcon, TRUE); // Big Icon
 
 		// Set Canvas Size
-		m_CanvasSize = { 400, 200 };
-		constexpr INT16 PlayerWidth = 40, PlayerHeight = 20;
+		m_CanvasSize.width = 400;
+		m_CanvasSize.height = 200;
 
-		m_Player.rcPlayer.top = m_CanvasSize.cy / 2 - PlayerHeight / 2;
-		m_Player.rcPlayer.left = 20;
-		m_Player.rcPlayer.bottom = m_CanvasSize.cy / 2 + PlayerHeight / 2;
-		m_Player.rcPlayer.right = 20 + PlayerWidth;
+		static constexpr INT16 PlayerWidth = 40, PlayerHeight = 20;
+
+		m_Player.rcPlayer.Location.x = 10;
+		m_Player.rcPlayer.Location.y = m_CanvasSize.height / 2 - PlayerHeight / 2;
+		m_Player.rcPlayer.Size.width = PlayerWidth;
+		m_Player.rcPlayer.Size.height = PlayerHeight;
 
 		Frame = 0;
 		m_Score = 0;
@@ -418,18 +416,19 @@ protected:
 
 	afx_msg void OnTimer(UINT_PTR nIDEvent) {
 
-		constexpr INT16 Void = 200, GateWidth = 20, HoleHeight = 60;
+		constexpr INT16 Space = 200, GateWidth = 20, HoleHeight = 60;
 
 		// Spawn Gates
 		if (m_Gates.size() <= 6) {
 			
-			LONG HolePosition = rand() % (m_CanvasSize.cy - HoleHeight) + 10;
+			INT32 HoleLocation = rand() % (m_CanvasSize.height - HoleHeight) - 10;
 			
-			if (m_Gates.size() == 0) {
+			if (m_Gates.empty()) {
 
 				m_Gates.push_back({
-					{ m_CanvasSize.cx + 20, 0, m_CanvasSize.cx + 20 + GateWidth, HolePosition },
-					{ m_CanvasSize.cx + 20, HolePosition + HoleHeight, m_CanvasSize.cx + 20 + GateWidth, m_CanvasSize.cy },
+					Rect4I(Vertex2I(m_CanvasSize.width + 20, 0), Size2I(GateWidth, HoleLocation)),
+					Rect4I(Vertex2I(m_CanvasSize.width + 20, HoleLocation + HoleHeight),
+						Size2I(GateWidth, m_CanvasSize.height - HoleLocation - HoleHeight)),
 					false
 				});
 
@@ -438,8 +437,9 @@ protected:
 				const Gate &last = m_Gates.back();
 
 				m_Gates.push_back({
-					{ last.rcTop.left + GateWidth + Void, 0, last.rcTop.right + Void + GateWidth, HolePosition },
-					{ last.rcTop.left + GateWidth + Void, HolePosition + HoleHeight, last.rcTop.right + Void + GateWidth, m_CanvasSize.cy },
+					Rect4I(Vertex2I(last.rcTop.Location.x + last.rcTop.Size.width + Space, 0), Size2I(GateWidth, HoleLocation)),
+					Rect4I(Vertex2I(last.rcBottom.Location.x + last.rcTop.Size.width + Space, HoleLocation + HoleHeight),
+						Size2I(GateWidth, m_CanvasSize.height - HoleLocation - HoleHeight)),
 					false
 				});
 
@@ -447,54 +447,28 @@ protected:
 
 		}
 
-		// Move Gates
-		if (Frame % 3 == 0) {
-			
-			INT16 GateSpeed = (m_Score > 20) ? 16 : 10;
-			
-			for (size_t i = 0; i < m_Gates.size(); i++) {
-
-				if (m_Gates[i].rcTop.right < -20) {
-
-					m_Gates.erase(m_Gates.begin() + i);
-					i--;
-					continue;
-
-				}
-
-				m_Gates[i].rcTop.OffsetRect(-GateSpeed, 0);
-				m_Gates[i].rcBottom.OffsetRect(-GateSpeed, 0);
-
-			}
-
-		}
-
 		// Collision Detection
-		for (size_t i = 0; i < m_Gates.size(); i++) {
+		for (Gate &Gate : m_Gates) {
 
-			CRect rcIntersectTop, rcIntersectBottom, rcIntersectScoreTrigger;
-
-			rcIntersectTop.IntersectRect(m_Gates[i].rcTop, m_Player.rcPlayer);
-			rcIntersectBottom.IntersectRect(m_Gates[i].rcBottom, m_Player.rcPlayer);
-
-			rcIntersectScoreTrigger.IntersectRect(CRect(m_Gates[i].rcTop.left, m_Gates[i].rcTop.bottom, m_Gates[i].rcBottom.right, m_Gates[i].rcBottom.top), m_Player.rcPlayer);
+			Rect4I rcScoreTriger(Gate.rcTop.Location.x, Gate.rcTop.Location.y + Gate.rcTop.Size.height,
+				Gate.rcTop.Size.width, m_CanvasSize.height - Gate.rcTop.Size.width - Gate.rcBottom.Size.width);
 			
-			if (!rcIntersectTop.IsRectEmpty() || !rcIntersectBottom.IsRectEmpty()) {
+  			if (m_Player.rcPlayer.IntersectWith(Gate.rcTop) || m_Player.rcPlayer.IntersectWith(Gate.rcBottom)) {
 
 				this->KillTimer(0xFF);
-				m_Gates.clear();
 
-				constexpr INT16 PlayerWidth = 40, PlayerHeight = 20;
+ 				m_Gates.clear();
 
-				m_Player.rcPlayer.top = m_CanvasSize.cy / 2 - PlayerHeight / 2;
-				m_Player.rcPlayer.left = 20;
-				m_Player.rcPlayer.bottom = m_CanvasSize.cy / 2 + PlayerHeight / 2;
-				m_Player.rcPlayer.right = 20 + PlayerWidth;
+				static constexpr INT16 PlayerWidth = 40, PlayerHeight = 20;
+
+				m_Player.rcPlayer.Location.x = 10;
+				m_Player.rcPlayer.Location.y = m_CanvasSize.height / 2 - PlayerHeight / 2;
+				m_Player.rcPlayer.Size.width = PlayerWidth;
+				m_Player.rcPlayer.Size.height = PlayerHeight;
 				m_Player.Fly = Player::State::DOWN;
 
-				CString GameOver;
-				GameOver.Format(_T("GAME OVER!\nYour Score: %I64d"), m_Score);
-				this->MessageBox(GameOver, _T("-- GAME OVER --"), MB_ICONINFORMATION | MB_OK);
+				std::string GameOver = "GAME OVER!\nYour Score: " + std::to_string(m_Score);
+				MessageBoxA(this->GetSafeHwnd(), GameOver.c_str(), "-- GAME OVER --", MB_ICONINFORMATION | MB_OK);
 
 				m_Score = 0;
 
@@ -503,10 +477,10 @@ protected:
 
 				break;
 
-			} else if (!rcIntersectScoreTrigger.IsRectEmpty() && m_Gates[i].Scored == false) {
+			} else if (m_Player.rcPlayer.IntersectWith(rcScoreTriger) && Gate.Scored == false) {
 
 				m_Score += 1;
-				m_Gates[i].Scored = true;
+				Gate.Scored = true;
 				MessageBeep(MB_ICONINFORMATION);
 
 				break;
@@ -515,21 +489,21 @@ protected:
 
 		}
 
-		if (m_Player.rcPlayer.top > m_CanvasSize.cy || m_Player.rcPlayer.bottom < 0) {
+		if (m_Player.rcPlayer.Location.y > m_CanvasSize.height || m_Player.rcPlayer.Location.y + m_Player.rcPlayer.Size.height < 0) {
 
 			this->KillTimer(0xFF);
 			m_Gates.clear();
 
-			constexpr INT16 PlayerWidth = 40, PlayerHeight = 20;
+			static constexpr INT16 PlayerWidth = 40, PlayerHeight = 20;
 
-			m_Player.rcPlayer.top = m_CanvasSize.cy / 2 - PlayerHeight / 2;
-			m_Player.rcPlayer.left = 20;
-			m_Player.rcPlayer.bottom = m_CanvasSize.cy / 2 + PlayerHeight / 2;
-			m_Player.rcPlayer.right = 20 + PlayerWidth;
+			m_Player.rcPlayer.Location.x = 10;
+			m_Player.rcPlayer.Location.y = m_CanvasSize.height / 2 - PlayerHeight / 2;
+			m_Player.rcPlayer.Size.width = PlayerWidth;
+			m_Player.rcPlayer.Size.height = PlayerHeight;
 			m_Player.Fly = Player::State::DOWN;
 			
 			CString GameOver;
-			GameOver.Format(_T("GAME OVER!\nYour Score: %I64d"), m_Score);
+			GameOver.Format(_T("GAME OVER!\nYour Score: %I64d\n"), m_Score);
 			this->MessageBox(GameOver, _T("-- GAME OVER --"), MB_ICONINFORMATION | MB_OK);
 			
 			m_Score = 0;
@@ -539,22 +513,42 @@ protected:
 
 		}
 
+		// Move Gates
+		if (Frame % 3 == 0) {
+
+			INT16 GateSpeed = (m_Score > 20) ? 10 : 8;
+
+			for (size_t i = 0; i < m_Gates.size(); i++) {
+
+				if (m_Gates[i].rcTop.Location.x + m_Gates[i].rcTop.Size.width < -20) {
+
+					m_Gates.erase(m_Gates.begin() + i);
+					i -= 1;
+					continue;
+
+				}
+
+				m_Gates[i].rcTop.Location.Offset(-GateSpeed, 0);
+				m_Gates[i].rcBottom.Location.Offset(-GateSpeed, 0);
+
+			}
+
+		}
+
 		// Player Movement
 		if (m_Player.Fly == Player::State::DOWN) {
-			INT32 PrevY = m_Player.rcPlayer.top;
-			m_Player.rcPlayer.MoveToY(PrevY + 4); // DOWN
+			m_Player.rcPlayer.Location.Offset(0, 2);
 		} else {
-			INT32 PrevY = m_Player.rcPlayer.top;
-			m_Player.rcPlayer.MoveToY(PrevY - 4); // UP
+			m_Player.rcPlayer.Location.Offset(0, -2);
 		}
 
 		CString StaticText;
 		StaticText.Format(_T("Score - %I64d"), m_Score);
 
 		m_StaticScore.SetWindowTextW(StaticText);
-
-		Frame++;
 		m_Gates.shrink_to_fit();
+
+		Frame += 1;
 
 		this->InvalidateRect(NULL, FALSE);
 
@@ -578,7 +572,7 @@ protected:
 			CDC MemoryDC;
 
 			MemoryDC.CreateCompatibleDC(&WindowDC);
-			Bitmap.CreateCompatibleBitmap(&WindowDC, m_CanvasSize.cx, m_CanvasSize.cy);
+			Bitmap.CreateCompatibleBitmap(&WindowDC, m_CanvasSize.width, m_CanvasSize.height);
 
 			HGDIOBJ PrevBitmap = MemoryDC.SelectObject(Bitmap);
 
@@ -592,7 +586,8 @@ protected:
 				ColorU::Enum::Yellow
 			};
 
-			GdiPlus::FillGradientH(MemoryDC, { m_Player.rcPlayer.left, m_Player.rcPlayer.top }, { m_Player.rcPlayer.Width(), m_Player.rcPlayer.Height() }, PlayerColors);
+			// Draw Player
+			GdiPlus::FillGradientH(MemoryDC, m_Player.rcPlayer.Location, m_Player.rcPlayer.Size, PlayerColors);
 
 			std::array<ColorU, 3> GateColors = {
 				ColorU::Enum::DarkGreen,
@@ -600,23 +595,21 @@ protected:
 				ColorU::Enum::DarkGreen
 			};
 
+			// Draw Gates
 			for (const Gate &Gate : m_Gates) {
 
-				GdiPlus::FillGradientH(MemoryDC, { Gate.rcTop.left, Gate.rcTop.top }, { Gate.rcTop.Width(), Gate.rcTop.Height() }, GateColors);
-				GdiPlus::FillGradientH(MemoryDC, { Gate.rcBottom.left, Gate.rcBottom.top }, { Gate.rcBottom.Width(), Gate.rcBottom.Height() }, GateColors);
+				GdiPlus::FillGradientH(MemoryDC, Gate.rcTop.Location, Gate.rcTop.Size, GateColors);
+				GdiPlus::FillGradientH(MemoryDC, Gate.rcBottom.Location, Gate.rcBottom.Size, GateColors);
 
 			}
 
-			WindowDC.StretchBlt(ClientRect.left, ClientRect.top, ClientRect.Width(), ClientRect.Height(), &MemoryDC, 0, 0, m_CanvasSize.cx, m_CanvasSize.cy, SRCCOPY);
+			WindowDC.StretchBlt(ClientRect.left, ClientRect.top, ClientRect.Width(), ClientRect.Height(),
+				&MemoryDC, 0, 0, m_CanvasSize.width, m_CanvasSize.height, SRCCOPY);
 
-			// std::wstring JSON = GateColors[1].ToStringW();
+			GdiPlus::DrawTextA(WindowDC, { 4, 4 }, { 50, 20 }, "Flappy Bird", m_Font_SegoeUI, ColorU::Enum::Yellow);
 
-			GdiPlus::DrawTextT(WindowDC, { 4, 4 }, { 50, 20 }, _T("Flappy Bird"), m_Font_SegoeUI, ColorU::Enum::Yellow);
-			// GdiPlus::DrawTextT(WindowDC, { 4, 38 }, { 50, 20 }, JSON.c_str(), m_Font_SegoeUI, ColorU::Enum::Orange);
-
-			// DWORD ret = GdiPlus::DrawImageT(*WindowDC, _T("WindowIcon.bmp"), LoadMode::LOAD_FROM_FILE, { 0, 0 }, { 400, 400 });
-			// OutputDebugStringA(Algorithms::GetWINAPIErrorMessage(ret).c_str());
-			// __debugbreak();
+			// std::string JSON = GateColors[1].ToString();
+			// GdiPlus::DrawTextT(WindowDC, { 4, 38 }, { 50, 20 }, Algorithms::StringToWString(JSON).c_str(), m_Font_SegoeUI, ColorU::Enum::Yellow);
 
 			MemoryDC.SelectObject(PrevBitmap);
 		
@@ -670,9 +663,9 @@ private:
 
 	CSize m_szMinWindowSize;
 
-	CSize m_CanvasSize;
-	Player m_Player;
+	Size2I m_CanvasSize;
 	UINT64 m_Score;
+	Player m_Player;
 	std::vector<Gate> m_Gates;
 	CStatic m_StaticScore;
 
@@ -700,8 +693,6 @@ END_MESSAGE_MAP()
 class MFCApp : public CWinApp {
 public:
 	
-	/// <summary></summary>
-	/// <returns></returns>
 	BOOL InitInstance() {
 
 		if (!this->IsWindows7()) {
@@ -730,7 +721,7 @@ public:
 
 		this->m_pMainWnd = Frame;
 
-		Frame->ShowWindow(this->m_nCmdShow);
+		Frame->ShowWindow(m_nCmdShow);
 		
 		return TRUE;
 

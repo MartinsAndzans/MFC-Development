@@ -33,6 +33,9 @@
     <Filter Include="IJType">
       <UniqueIdentifier>{765509c2-325c-4c63-97f0-412d42fc329c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{fa0622d1-5a62-4119-98df-a6bd69953d8c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MFCResources.rc">
@@ -71,14 +74,14 @@
     <ClInclude Include="Log.h">
       <Filter>Log</Filter>
     </ClInclude>
-    <ClInclude Include="ColorU.h">
-      <Filter>GdiPlus</Filter>
-    </ClInclude>
     <ClInclude Include="IJType.h">
       <Filter>IJType</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsTypes.h">
-      <Filter>GdiPlus</Filter>
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorU.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

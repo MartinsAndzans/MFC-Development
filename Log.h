@@ -16,49 +16,62 @@
 #endif // !_STDINT
 //====================//
 
-enum class DebugLevel {
-	Info,
-	Warning,
-	Error,
-	None
-};
-
 struct Entry {
-
-	Entry()
-		: m_LogMessage(), m_TimeStamp(), m_DebugLevel(DebugLevel::None)
-	{ /*...*/ }
-
-	Entry(const std::string &LogMessage, std::time_t TimeStamp, DebugLevel DebugLevel)
-		: m_LogMessage(LogMessage), m_TimeStamp(TimeStamp), m_DebugLevel(DebugLevel)
-	{ /*...*/ }
 
 	std::string m_LogMessage;
 	std::time_t m_TimeStamp;
-	DebugLevel m_DebugLevel;
+
+	Entry()
+		: m_LogMessage("Empty Log"), m_TimeStamp(0)
+	{ /*...*/ }
+
+	Entry(const std::string &LogMessage, std::time_t TimeStamp)
+		: m_LogMessage(LogMessage), m_TimeStamp(TimeStamp)
+	{ /*...*/ }
 	
 };
 
 class DebugLog {
+public:
 
-	DebugLog();
+	enum class DebugLevel {
+		Info,
+		Warning,
+		Error,
+		None
+	};
+
+	DebugLog()
+		: m_CurrentDebugLevel(DebugLevel::None), m_DebugLogVector()
+	{ /*...*/ }
 
 	void AddEntry(const std::string &LogMessage) {
-		// m_DebugLogEntryData.push_back();
+		
+		switch (m_CurrentDebugLevel) {
+		case DebugLevel::Info:
+			break;
+		case DebugLevel::Warning:
+			break;
+		case DebugLevel::Error:
+			break;
+		case DebugLevel::None:
+			break;
+		}
+
 	}
 
-	void SetDebugLevel(DebugLevel debugLevel) {
-		m_CurrentDebugLevel = debugLevel;
+	size_t GetEntryCount(void) {
+		return m_DebugLogVector.size();
 	}
 
-	const std::vector<Entry>& GetDebugLogEntryData() const noexcept {
-		return m_DebugLogEntryData;
+	void SetDebugLevel(DebugLevel NewDebugLevel) {
+		m_CurrentDebugLevel = NewDebugLevel;
 	}
 	
 private:
 
 	DebugLevel m_CurrentDebugLevel;
-	std::vector<Entry> m_DebugLogEntryData;
+	std::vector<Entry> m_DebugLogVector;
 
 };
 

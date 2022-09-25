@@ -36,79 +36,6 @@
 #include "ColorU.h"
 //====================//
 
-enum HATCHSTYLE : INT {
-	HATCH_HORIZONTAL = HS_HORIZONTAL, // Horizontal hatch
-	HATCH_VERTICAL = HS_VERTICAL, // Vertical hatch
-	HATCH_CROSS = HS_CROSS, // Horizontal and vertical crosshatch
-	HATCH_DIAGCROSS = HS_DIAGCROSS, // 45 - degree crosshatch
-	HATCH_BDIAGONAL = HS_BDIAGONAL, // 45 - degree upward left - to - right hatch
-	HATCH_FDIAGONAL = HS_FDIAGONAL // 45 - degree downward left - to - right hatch
-};
-
-// # unique_ptr RAII #
-class GdiBrush {
-public:
-
-	// ===== PATTERN BRUSH =====
-	explicit GdiBrush(HBITMAP hBitmap)
-		: m_hBrush(CreatePatternBrush(hBitmap))
-	{ /*...*/ }
-
-	// ===== SOLID BRUSH =====
-	explicit GdiBrush(const ColorU &Color)
-		: m_hBrush(CreateSolidBrush(Color))
-	{ /*...*/ }
-	
-	// ===== SOLID BRUSH =====
-	explicit GdiBrush(HATCHSTYLE Hatch, const ColorU &Color)
-		: m_hBrush(CreateHatchBrush(Hatch, Color))
-	{ /*...*/ }
-
-	GdiBrush(const GdiBrush &other) = delete;
-	GdiBrush& operator=(const GdiBrush &other) = delete;
-
-	HBRUSH get(void) const {
-		return m_hBrush;
-	}
-	
-	operator HBRUSH() const {
-		return m_hBrush;
-	}
-
-	~GdiBrush() noexcept {
-		DeleteObject(m_hBrush);
-	}
-	
-
-private:
-	
-	HBRUSH m_hBrush;
-
-};
-
-class GdiBitmap {
-public:
-
-	GdiBitmap() {
-
-		constexpr INT32 Width = 100, Height = 100;
-
-		m_hBitmap = NULL;
-
-		// CreateBitmap()
-
-	}
-
-	~GdiBitmap() {
-		DeleteObject(m_hBitmap);
-	}
-
-private:
-
-	HBITMAP m_hBitmap;
-
-};
-
 // # Image Load Properties #
 enum class LoadMode : UINT16 {
 	LOAD_FROM_FILE,
@@ -119,46 +46,31 @@ enum class LoadMode : UINT16 {
 
 struct GdiPlus {
 
-	static void _stdcall DrawLine(HDC hdc, const Vertex2I &lineBegin, const Vertex2I &lineEnd,
+	static void WINAPI DrawLine(HDC hdc, const Vertex2I &lineBegin, const Vertex2I &lineEnd,
 		const ColorU &strokeColor = ColorU::Enum::DarkBlue, UINT32 strokeWidth = 1U) {
 
-
-		if (lineBegin == lineEnd) {
-			
-			ColorU PrevColor = SetDCBrushColor(hdc, strokeColor);
-			
-			UINT32 Radius = (UINT32)(ceil(strokeWidth / 2.0F));
-			FillEllipse(hdc, lineBegin, Radius, Radius, (HBRUSH)(GetStockObject(DC_BRUSH)));
-			
-			SetDCBrushColor(hdc, PrevColor);
-			
-		} else {
-			
-			HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
-			HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
-			
-			MoveToEx(hdc, lineBegin.x, lineBegin.y, nullptr);
-			LineTo(hdc, lineEnd.x, lineEnd.y);
-			
-			SelectObject(hdc, PrevPen);
-			DeleteObject(StrokePen);
+		HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
+		HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
 		
-		}
-
+		MoveToEx(hdc, lineBegin.x, lineBegin.y, nullptr);
+		LineTo(hdc, lineEnd.x, lineEnd.y);
+		
+		SelectObject(hdc, PrevPen);
+		DeleteObject(StrokePen);
 
 	}
 
-	static void _stdcall DrawRectangle(HDC hdc, const Vertex2I &Position, const Size2I &Size,
+	static void WINAPI DrawRectangle(HDC hdc, const Vertex2I &Location, const Size2I &Size,
 		const ColorU &strokeColor = ColorU::Enum::DarkBlue, UINT32 strokeWidth = 1U) noexcept {
 
 		HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
 		HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
 		
 		POINT PointBuffer[] = {
-			{ Position.x, Position.y },
-			{ Position.x + Size.width, Position.y },
-			{ Position.x + Size.width, Position.y + Size.height },
-			{ Position.x, Position.y + Size.height }
+			{ Location.x, Location.y },
+			{ Location.x + Size.width, Location.y },
+			{ Location.x + Size.width, Location.y + Size.height },
+			{ Location.x, Location.y + Size.height }
 		};
 
 		constexpr BYTE PointTypes[] = {
@@ -175,7 +87,7 @@ struct GdiPlus {
 
 	}
 
-	static void _stdcall DrawEllipse(HDC hdc, const Vertex2I &CenterPoint, UINT32 RadiusX, UINT32 RadiusY,
+	static void WINAPI DrawEllipse(HDC hdc, const Vertex2I &CenterPoint, UINT32 RadiusX, UINT32 RadiusY,
 		const ColorU &strokeColor = ColorU::Enum::DarkBlue, UINT32 strokeWidth = 1U) noexcept {
 
 		HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
@@ -189,14 +101,14 @@ struct GdiPlus {
 		
 	}
 
-	static void _stdcall DrawBiezerCurve(HDC, Vertex2I, Vertex2I, Vertex2I, Vertex2I, const ColorU &strokeColor, UINT32 strokeWidth) {
+	static void WINAPI DrawBiezerCurve(HDC, Vertex2I, Vertex2I, Vertex2I, Vertex2I, const ColorU &strokeColor, UINT32 strokeWidth) {
 
 		OutputDebugString(_T("Function Is Not Implemented Yet!"));
 		// TODO: Implement Function
 
 	}
 
-	static void _stdcall DrawTriangle(HDC hdc, const std::array<Vertex2I, 3> &Triangle,
+	static void WINAPI DrawTriangle(HDC hdc, const std::array<Vertex2I, 3> &Triangle,
 		const ColorU &strokeColor = ColorU::Enum::DarkBlue, UINT32 strokeWidth = 1U) noexcept {
 
 		HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
@@ -222,7 +134,7 @@ struct GdiPlus {
 	}
 
 	template<size_t ArraySize>
-	static void _stdcall DrawGeometry(HDC hdc, const std::array<Vertex2I, ArraySize> &VertexBuffer,
+	static void WINAPI DrawGeometry(HDC hdc, const std::array<Vertex2I, ArraySize> &VertexBuffer,
 		const ColorU &strokeColor = ColorU::Enum::DarkBlue, UINT32 strokeWidth = 1U) noexcept {
 		
 		static_assert(ArraySize >= 1, "At Least ONE Vertice is Required");
@@ -231,26 +143,23 @@ struct GdiPlus {
 		HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
 
 		switch (VertexBuffer.size()) {
-		case 1U: // Dot
-
-			SetPixelV(hdc, VertexBuffer[0].x, VertexBuffer[0].y, strokeColor);
-			
+		case 1U: // DOT
+			MoveToEx(hdc, VertexBuffer[0].x, VertexBuffer[0].y, nullptr);
+			LineTo(hdc, VertexBuffer[0].x, VertexBuffer[0].y);
 			break;
-
-		case 2U: // Line
-
+		case 2U: // LINE
 			MoveToEx(hdc, VertexBuffer[0].x, VertexBuffer[0].y, nullptr);
 			LineTo(hdc, VertexBuffer[1].x, VertexBuffer[1].y);
 			break;
-
-		default: // Other Geometry
+		default: // OTHER GEOMETRY
 
 			POINT PointBuffer[ArraySize] = { 0 };
 			BYTE PointTypes[ArraySize] = { 0 };
 
 			for (size_t i = 0; i < ARRAYSIZE(PointBuffer); i++) {
 
-				PointBuffer[i] = VertexBuffer[i];
+				PointBuffer[i].x = VertexBuffer[i].x;
+				PointBuffer[i].y = VertexBuffer[i].y;
 
 				if (i == 0) {
 					PointTypes[i] = PT_MOVETO;
@@ -273,7 +182,7 @@ struct GdiPlus {
 
 	}
 
-	static void _stdcall FillRectangle(HDC hdc, const Vertex2I &Position, const Size2I &Size, HBRUSH hBrush) noexcept {
+	static void WINAPI FillRectangle(HDC hdc, const Vertex2I &Location, const Size2I &Size, HBRUSH hBrush) noexcept {
 
 		HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
 
@@ -281,10 +190,10 @@ struct GdiPlus {
 		HGDIOBJ PrevBrush = SelectObject(hdc, hBrush);
 
 		POINT PointBuffer[] = {
-			{ Position.x, Position.y },
-			{ Position.x + Size.width, Position.y },
-			{ Position.x + Size.width, Position.y + Size.height },
-			{ Position.x, Position.y + Size.height }
+			{ Location.x, Location.y },
+			{ Location.x + Size.width, Location.y },
+			{ Location.x + Size.width, Location.y + Size.height },
+			{ Location.x, Location.y + Size.height }
 		};
 
 		Polygon(hdc, PointBuffer, ARRAYSIZE(PointBuffer));
@@ -294,7 +203,7 @@ struct GdiPlus {
 		
 	}
 
-	static void _stdcall FillEllipse(HDC hdc, const Vertex2I &CenterPoint, UINT32 RadiusX, UINT32 RadiusY, HBRUSH hBrush) noexcept {
+	static void WINAPI FillEllipse(HDC hdc, const Vertex2I &CenterPoint, UINT32 RadiusX, UINT32 RadiusY, HBRUSH hBrush) noexcept {
 
 		HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
 
@@ -308,7 +217,7 @@ struct GdiPlus {
 
 	}
 
-	static void _stdcall FillTriangle(HDC hdc, const std::array<Vertex2I, 3> &Triangle, HBRUSH hBrush) noexcept {
+	static void WINAPI FillTriangle(HDC hdc, const std::array<Vertex2I, 3> &Triangle, HBRUSH hBrush) noexcept {
 
 		HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
 
@@ -329,7 +238,7 @@ struct GdiPlus {
 	}
 
 	template<size_t ArraySize>
-	static void _stdcall FillGeometry(HDC hdc, const std::array<Vertex2I, ArraySize> &VertexBuffer, HBRUSH hBrush) noexcept {
+	static void WINAPI FillGeometry(HDC hdc, const std::array<Vertex2I, ArraySize> &VertexBuffer, HBRUSH hBrush) noexcept {
 
 		static_assert(ArraySize >= 2, "At Least TWO Vertices is Required");
 
@@ -343,7 +252,8 @@ struct GdiPlus {
 		POINT PointBuffer[ArraySize] = {0};
 		
 		for (size_t i = 0; i < ArraySize; i++) {
-			PointBuffer[i] = VertexBuffer[i];
+			PointBuffer[i].x = VertexBuffer[i].x;
+			PointBuffer[i].y = VertexBuffer[i].y;
 		}
 
 		Polygon(hdc, PointBuffer, ARRAYSIZE(PointBuffer));
@@ -355,22 +265,23 @@ struct GdiPlus {
 
 	}
 
-	static Size2I _stdcall DrawTextT(_In_ HDC hdc, _In_ const Vertex2I &Position, _In_ const Size2I &Size,
-		_In_z_ LPCTSTR Text, _In_ HFONT TextFont, _In_ const ColorU &TextColor = ColorU::Enum::DarkBlue) {
+	#pragma push_macro("DrawText")
+	#undef DrawText
 
-		ColorU PrevColor = SetTextColor(hdc, TextColor);
+	static Size2I WINAPI DrawTextA(_In_ HDC hdc, _In_ const Vertex2I &Location, _In_ const Size2I &Size,
+		_In_ const std::string &String, _In_ HFONT TextFont, _In_ const ColorU &TextColor = ColorU::Enum::DarkBlue) {
+
+		COLORREF PrevColor = SetTextColor(hdc, TextColor);
 		HGDIOBJ PrevFont = SelectObject(hdc, TextFont);
 
 		SIZE szTextSize = { 0 };
-		INT TextLength = (INT)(_tcslen(Text));
+		INT TextLength = String.length();
 
-		//do {
-			GetTextExtentPoint32(hdc, Text, TextLength, &szTextSize);
-		//} while (szTextSize.cx > Size.width);
-		
-		DrawState(hdc, NULL, NULL, (LPARAM)(Text), (WPARAM)(TextLength), Position.x, Position.y, Size.width, Size.height, DST_TEXT | DT_END_ELLIPSIS);
+		GetTextExtentPoint32A(hdc, String.c_str(), TextLength, &szTextSize);
 
-		//TextOut(hdc, Position.x, Position.y, Text, TextLength);
+
+
+		TextOutA(hdc, Location.x, Location.y, String.c_str(), TextLength);
 
 		SetTextColor(hdc, PrevColor);
 		SelectObject(hdc, PrevFont);
@@ -379,14 +290,19 @@ struct GdiPlus {
 
 	}
 
+	#pragma pop_macro("DrawText")
+
 	/// <summary>This Function Draw Image From File with ".bmp" Extension or Application Resource</summary>
 	/// <param name="FileName">More Information is Located in "Mode" Parameter Anotation</param>
 	/// <param name="Mode"><para>LOAD_FROM_FILE - Load Image From File with ".bmp" Extension</para>
 	/// <para>LOAD_FROM_RESOURCE - Load Image From Resource - Use "MAKEINTRESOURCE" Macro OR Prefix Resource ID with "#"</para>
 	/// <para>MONOCHROME - Load Monochrome Image (Black - White)</para></param>
-	/// <returns><para>If Succeded Returns TRUE</para><para>If Failed Returns FALSE</para></returns>
-	static _Success_(return == 0) DWORD _stdcall DrawImageT(_In_ HDC hdc, _In_z_ LPCTSTR FileName, _In_ LoadMode Mode,
-		_In_ const Vertex2I &Position, _In_ const Size2I &Size) noexcept {
+	/// <returns>
+	/// <para>If Succeded Returns TRUE</para>
+	/// <para>If Failed Returns FALSE</para>
+	/// </returns>
+	static _Success_(return == 0) DWORD WINAPI DrawImageT(_In_ HDC hdc, _In_z_ LPCTSTR FileName, _In_ LoadMode Mode,
+		_In_ const Vertex2I &Location, _In_ const Size2I &Size) noexcept {
 
  		HBITMAP ImageBitmap = NULL;
 		HINSTANCE hInstance = GetModuleHandle(NULL);
@@ -420,7 +336,7 @@ struct GdiPlus {
 		//--------------------------------------------------------------------------------------------------
 		// Draw Image
 		HGDIOBJ PrevBitmap = SelectObject(BitmapDC, ImageBitmap);
-		BitBlt(hdc, Position.x, Position.y, Size.width, Size.height, BitmapDC, 0, 0, SRCCOPY);
+		BitBlt(hdc, Location.x, Location.y, Size.width, Size.height, BitmapDC, 0, 0, SRCCOPY);
 		SelectObject(BitmapDC, PrevBitmap);
 		//--------------------------------------------------------------------------------------------------
 
@@ -435,7 +351,7 @@ struct GdiPlus {
 	}
 
 	template<size_t ArraySize>
-	static void _stdcall FillGradientH(HDC hdc, const Vertex2I &Position, const Size2I &Size,
+	static void WINAPI FillGradientH(HDC hdc, const Vertex2I &Location, const Size2I &Size,
 		const std::array<ColorU, ArraySize> &ColorCollection = { ColorU::Enum::DarkBlue, ColorU::Enum::LightBlue, ColorU::Enum::DarkBlue }) noexcept {
 
 		static_assert(ArraySize >= 2, "At Least TWO Colors is Required");
@@ -461,19 +377,19 @@ struct GdiPlus {
 				#pragma warning(disable:4838)
 				
 				{
-					GradientBeginX, 0,                                   // X, Y
-					ColorCollection[i].GetXValue(ColorU::Value::R) << 8, // Red
-					ColorCollection[i].GetXValue(ColorU::Value::G) << 8, // Green
-					ColorCollection[i].GetXValue(ColorU::Value::B) << 8, // Blue
-					0x0000                                               // Alpha
+					GradientBeginX, 0,                                       // X, Y
+					ColorCollection[i].GetXValue(ColorU::Component::R) << 8, // Red
+					ColorCollection[i].GetXValue(ColorU::Component::G) << 8, // Green
+					ColorCollection[i].GetXValue(ColorU::Component::B) << 8, // Blue
+					0x0000                                                   // Alpha
 				},
 
 				{
-					GradientEndX, Size.height,                               // X, Y
-					ColorCollection[i + 1].GetXValue(ColorU::Value::R) << 8, // Red
-					ColorCollection[i + 1].GetXValue(ColorU::Value::G) << 8, // Green
-					ColorCollection[i + 1].GetXValue(ColorU::Value::B) << 8, // Blue
-					0x0000                                                   // Alpha
+					GradientEndX, Size.height,                                   // X, Y
+					ColorCollection[i + 1].GetXValue(ColorU::Component::R) << 8, // Red
+					ColorCollection[i + 1].GetXValue(ColorU::Component::G) << 8, // Green
+					ColorCollection[i + 1].GetXValue(ColorU::Component::B) << 8, // Blue
+					0x0000                                                       // Alpha
 				}
 
 				#pragma warning(default:4838)
@@ -488,7 +404,7 @@ struct GdiPlus {
 
 		}
 
-		BitBlt(hdc, Position.x, Position.y, Size.width, Size.height, MemoryDC, 0, 0, SRCCOPY);
+		BitBlt(hdc, Location.x, Location.y, Size.width, Size.height, MemoryDC, 0, 0, SRCCOPY);
 
 		SelectObject(MemoryDC, PrevBitmap);
 		
@@ -501,7 +417,7 @@ struct GdiPlus {
 	}
 
 	template<size_t ArraySize>
-	static void _stdcall FillGradientV(HDC hdc, const Vertex2I &Position, const Size2I &Size,
+	static void WINAPI FillGradientV(HDC hdc, const Vertex2I &Location, const Size2I &Size,
 		const std::array<ColorU, ArraySize> &ColorCollection = { ColorU::Enum::DarkBlue, ColorU::Enum::LightBlue, ColorU::Enum::DarkBlue }) {
 
 		static_assert(ArraySize >= 2, "At Least TWO Colors is Required");
@@ -527,19 +443,19 @@ struct GdiPlus {
 				#pragma warning(disable:4838)
 
 				{
-					0, GradientBeginY,                                   // X, Y
-					ColorCollection[i].GetXValue(ColorU::Value::R) << 8, // Red
-					ColorCollection[i].GetXValue(ColorU::Value::G) << 8, // Green
-					ColorCollection[i].GetXValue(ColorU::Value::B) << 8, // Blue
-					0x0000                                               // Alpha
+					0, GradientBeginY,                                       // X, Y
+					ColorCollection[i].GetXValue(ColorU::Component::R) << 8, // Red
+					ColorCollection[i].GetXValue(ColorU::Component::G) << 8, // Green
+					ColorCollection[i].GetXValue(ColorU::Component::B) << 8, // Blue
+					0x0000                                                   // Alpha
 				},
 
 				{
-					Size.width, GradientEndY,                                // X, Y
-					ColorCollection[i + 1].GetXValue(ColorU::Value::R) << 8, // Red
-					ColorCollection[i + 1].GetXValue(ColorU::Value::G) << 8, // Green
-					ColorCollection[i + 1].GetXValue(ColorU::Value::B) << 8, // Blue
-					0x0000                                                   // Alpha
+					Size.width, GradientEndY,                                    // X, Y
+					ColorCollection[i + 1].GetXValue(ColorU::Component::R) << 8, // Red
+					ColorCollection[i + 1].GetXValue(ColorU::Component::G) << 8, // Green
+					ColorCollection[i + 1].GetXValue(ColorU::Component::B) << 8, // Blue
+					0x0000                                                       // Alpha
 				}
 
 				#pragma warning(default:4838)
@@ -554,7 +470,7 @@ struct GdiPlus {
 
 		}
 
-		BitBlt(hdc, Position.x, Position.y, Size.width, Size.height, MemoryDC, 0, 0, SRCCOPY);
+		BitBlt(hdc, Location.x, Location.y, Size.width, Size.height, MemoryDC, 0, 0, SRCCOPY);
 
 		SelectObject(MemoryDC, PrevBitmap);
 

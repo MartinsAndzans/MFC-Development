@@ -1,349 +1,340 @@
 #ifndef __GRAPHICS_TYPES_H__
 #define __GRAPHICS_TYPES_H__
 
-/*************************************************
-*                                                *
-* Copyright(c) 2022 Martins Andzans              *
-* Licensed Under MIT License                     *
-*                                                *
-*************************************************/
+/************************************
+*                                   *
+* Copyright(c) 2022 Martins Andzans *
+* Licensed Under MIT License        *
+*                                   *
+************************************/
 
 //===== HEADERS ======//
-#include "IJType.h"
+#include <string>
 #include <utility>
+#ifndef _STDINT
+#include <stdint.h>
+#endif // !_STDINT
 //====================//
 
-//======== REDEFINE MACROS ========//
-#pragma push_macro("LODWORD")
-#pragma push_macro("HIDWORD")
-#undef LODWORD
-#undef HIDWORD
-//=================================//
+using float_t = float;
+using double_t = double;
 
-#define MAKEDOUBLEDWORD(l, h) (int64_t)(((int32_t)(l))|((int64_t)((int32_t)(h))<<32))
-#define LODWORD(data) (int32_t)((int64_t)(data))
-#define HIDWORD(data) (int32_t)(((int64_t)(data))>>32)
+// # Geometry Vertex2T <Type> #
+template<typename Type>
+struct Vertex2T {
 
-// # Geometry Vertex #
-struct Vertex2I : implements IJType {
-
-	int32_t x, y;
+	Type x;
+	Type y;
 
 	//----------------------------------------
 	// Constructors
 
-	// # Default Constructor Set "Vertex2I" To (0, 0) #
-	Vertex2I() noexcept
+	// # Default Constructor Initialize Object with Zeros #
+	Vertex2T(void) noexcept
 		: x(0), y(0)
 	{ /*...*/ }
 
-	// # Set "Vertex2I" To (initX, initY) #
-	Vertex2I(int32_t initX, int32_t initY) noexcept
-		: x(initX), y(initY)
-	{ /*...*/ }
-
-	// # Use "MAKEDOUBLEDWORD" Macro - LODWORD = X | HIDWORD = Y #
-	Vertex2I(int64_t initPosition) noexcept
-		: x(LODWORD(initPosition)), y(HIDWORD(initPosition))
+	Vertex2T(Type x, Type y) noexcept
+		: x(x), y(y)
 	{ /*...*/ }
 
 	//----------------------------------------
 
 	// # Copy Constructor #
-	Vertex2I(const Vertex2I &other) noexcept = default;
+	Vertex2T(const Vertex2T &other) noexcept = default;
 	// # Copy Assigment Operator #
-	Vertex2I& operator=(const Vertex2I &other) noexcept = default;
+	Vertex2T& operator=(const Vertex2T &other) noexcept = default;
 
-	//----------------------------------------
-	// Setters
-
-	// # Set "Vertex2I" To (newX, newY) #
-	void SetPoint(int32_t newX, int32_t newY) noexcept {
-		x = newX;
-		y = newY;
+	// # Set X and Y To VALUE #
+	void xy(Type value) noexcept {
+		x = y = value;
 	}
 
-	// # Use "MAKEDOUBLEDWORD" Macro - LODWORD = X | HIDWORD = Y #
-	void SetPoint(int64_t newPosition) noexcept {
-		x = LODWORD(newPosition);
-		y = HIDWORD(newPosition);
-	}
-
-	//----------------------------------------
-
-	// # Offsets "x" by "xOffset" and "y" by "yOffset" #
-	void Offset(int32_t xOffset, int32_t yOffset) noexcept {
+	/// <param name="xOffset">
+	/// <para>In Screen Coordinate System</para>
+	/// <para>- "-xOffset" Offset To Left</para>
+	/// <para>- "xOffset" Offset To Right</para>
+	/// </param>
+	/// <param name="yOffset">
+	/// <para>In Screen Coordinate System</para>
+	/// <para>- "-yOffset" Offset To Up</para>
+	/// <para>- "yOffset" Offset To Down</para>
+	/// </param>
+	void Offset(Type xOffset, Type yOffset) noexcept {
 		x += xOffset;
 		y += yOffset;
 	}
 
-	// # Use "MAKEDOUBLEDWORD" Macro - LODWORD = XOFFSET | HIDWORD = YOFFSET #
-	// # Offsets "x" by "xOffset" and "y" by "yOffset" #
-	void Offset(int64_t Offset) noexcept {
-		x += LODWORD(Offset);
-		y += HIDWORD(Offset);
+	// # Offset This Object Location To Other Object Location #
+	void Offset(const Vertex2T &offset) noexcept {
+		x += offset.x;
+		y += offset.y;
 	}
 
-	bool operator==(const Vertex2I &other) const noexcept {
+	// # Returns TRUE If This Object Location is Equal with Other Object Location #
+	bool Equal(const Vertex2T &other) const noexcept {
 		return x == other.x && y == other.y;
 	}
 
-	bool operator!=(const Vertex2I &other) const noexcept {
-		return x != other.x || y != other.y;
+	// # Returns TRUE If X and Y is Zero #
+	bool IsNull(void) const noexcept {
+		return x == 0 && y == 0;
+	}
+
+	bool operator==(const Vertex2T &other) const noexcept {
+		return Equal(other);
+	}
+
+	bool operator!=(const Vertex2T &other) const noexcept {
+		return !Equal(other);
 	}
 
 	//----------------------------------------
 	// Serializing
 
-	// Returns "Vertex2I" Content in JSON Format
-	// "Vertex2I": { "x": x, "y": y }
-	std::string ToString() const override {
-		return "\"Vertex2I\": { \"x\": " + std::to_string(x)
-			+ ", \"y\": " + std::to_string(y) + " }";
+	// Returns "Vertex2T" Content in JSON Format
+	// "Vertex2T": { "x": {}, "y": {} }
+	std::string ToString(void) const {
+		return R"("Vertex2T": { "x": )" + std::to_string(x) +
+			   R"(, "y": )" + std::to_string(y) + R"( })";
 	}
 
 	//----------------------------------------
 
 	// # Default Destructor #
-	~Vertex2I() noexcept override = default;
+	~Vertex2T() noexcept = default;
 
 };
 
-// # Geometry Size #
-struct Size2I : implements IJType {
+// # Geometry Vertex2S <int16_t> #
+using Vertex2S = Vertex2T<int16_t>;
+// # Geometry Vertex2US <uint16_t> #
+using Vertex2US = Vertex2T<uint16_t>;
+// # Geometry Vertex2I <int32_t> #
+using Vertex2I = Vertex2T<int32_t>;
+// # Geometry Vertex2UI <uint32_t> #
+using Vertex2UI = Vertex2T<uint32_t>;
+// # Geometry Vertex2L <int64_t> #
+using Vertex2L = Vertex2T<int64_t>;
+// # Geometry Vertex2UL <uint64_t> #
+using Vertex2UL = Vertex2T<uint64_t>;
+// # Geometry Vertex2F <float_t> #
+using Vertex2F = Vertex2T<float_t>;
+// # Geometry Vertex2D <double_t> #
+using Vertex2D = Vertex2T<double_t>;
 
-	int32_t width, height;
+// # Geometry Size2T <Type> #
+template<typename Type>
+struct Size2T {
+
+	Type width;
+	Type height;
 
 	//----------------------------------------
 	// Constructors
 
-	// # Default Constructor Set "Size2I" To (0, 0) #
-	Size2I() noexcept
+	// # Default Constructor Initialize Object with Zeros #
+	Size2T() noexcept
 		: width(0), height(0)
 	{ /*...*/ }
 
-	// # Set "Size2I" To (initWidth, initHeight) #
-	Size2I(int32_t initWidth, int32_t initHeight) noexcept
-		: width(initWidth), height(initHeight)
-	{ /*...*/ }
-
-	// # Use "MAKEDOUBLEDWORD" Macro - LODWORD = WIDTH | HIDWORD = HEIGHT #
-	Size2I(int64_t initSize) noexcept
-		: width(LODWORD(initSize)), height(HIDWORD(initSize))
+	Size2T(Type width, Type height) noexcept
+		: width(width), height(height)
 	{ /*...*/ }
 
 	//----------------------------------------
 
 	// # Copy Constructor #
-	Size2I(const Size2I &other) noexcept = default;
+	Size2T(const Size2T &other) noexcept = default;
 	// # Copy Assigment Operator #
-	Size2I& operator=(const Size2I &other) noexcept = default;
-
-	//----------------------------------------
-	// Setters
-
-	// # Set "Size2I" To (newWidth, newHeight) #
-	void SetSize(int32_t newWidth, int32_t newHeight) noexcept {
-		width = newWidth;
-		height = newHeight;
+	Size2T& operator=(const Size2T &other) noexcept = default;
+	
+	// # Set Width and Height To VALUE #
+	void wh(Type value) {
+		width = height = value;
 	}
 
-	// # Use "MAKEDOUBLEDWORD" Macro - LODWORD = WIDTH | HIDWORD = HEIGHT #
-	void SetSize(int64_t newSize) noexcept {
-		width = LODWORD(newSize);
-		height = HIDWORD(newSize);
+	// # Scales This Object Size By Given Factor >= 1 #
+	void Scale(int16_t wFactor, int16_t hFactor) noexcept {
+		(wFactor > 1) ? width *= wFactor : width;
+		(hFactor > 1) ? height *= hFactor : height;
 	}
 
-	//----------------------------------------
-
-	void AddSize(const Size2I &other) noexcept {
-		width += other.width;
-		height += other.height;
+	// # Scales This Object Size By Given Factor >= 1 #
+	void Scale(float_t wFactor, float_t hFactor) noexcept {
+		(wFactor > 1.0F) ? width = static_cast<Type>(width * wFactor) : width;
+		(hFactor > 1.0F) ? height = static_cast<Type>(height * hFactor) : height;
 	}
 
-	void SubstractSize(const Size2I &other) noexcept {
-		width -= other.width;
-		height -= other.height;
-	}
-
-	bool operator==(const Size2I &other) const noexcept {
+	// # Returns TRUE If This Object Size is Equal with Other Object Size #
+	bool Equal(const Size2T &other) const noexcept {
 		return width == other.width && height == other.height;
 	}
 
-	bool operator!=(const Size2I &other) const noexcept {
-		return width != other.width || height != other.height;
+	// # Returns TRUE If Width and Height is Zero #
+	bool IsNull(void) const noexcept {
+		return width == 0 && height == 0;
 	}
 
-	void operator+=(const Size2I &other) noexcept {
-		AddSize(other);
+	bool operator==(const Size2T &other) const noexcept {
+		return Equal(other);
 	}
 
-	void operator-=(const Size2I &other) noexcept {
-		SubstractSize(other);
-	}
-
-	Size2I operator+(const Size2I& other) noexcept {
-		Size2I Temp(*this);
-		Temp.AddSize(other);
-		return Temp;
-	}
-
-
-	Size2I operator-(const Size2I& other) noexcept {
-		Size2I Temp(*this);
-		Temp.SubstractSize(other);
-		return Temp;
+	bool operator!=(const Size2T &other) const noexcept {
+		return !Equal(other);
 	}
 
 	//----------------------------------------
 	// Serializing
 
-	// Returns "Size2I" Content in JSON Format
-	// "Size21": { "width": width, "height": height }
-	std::string ToString() const override {
-		return "\"Size2I\": { \"width\": " + std::to_string(width)
-			+ ", \"height\": " + std::to_string(height) + " }";
+	// Returns "Size2T" Content in JSON Format
+	// "Size2T": { "width": {}, "height": {} }
+	std::string ToString(void) const {
+		return R"("Size2T": { "width": )" + std::to_string(width)
+			+ R"(, "height": )" + std::to_string(height) + R"( })";
 	}
 
 	//----------------------------------------
 
 	// # Default Destructor #
-	~Size2I() noexcept override = default;
+	~Size2T() noexcept = default;
 
 };
 
-struct Rect4I : implements IJType {
+// # Geometry Size2S <int16_t> #
+using Size2S = Size2T<int16_t>;
+// # Geometry Size2US <uint16_t> #
+using Size2US = Size2T<uint16_t>;
+// # Geometry Size2I <int32_t> #
+using Size2I = Size2T<int32_t>;
+// # Geometry Size2UI <uint32_t> #
+using Size2UI = Size2T<uint32_t>;
+// # Geometry Size2L <int64_t> #
+using Size2L = Size2T<int64_t>;
+// # Geometry Size2UL <uint64_t> #
+using Size2UL = Size2T<uint64_t>;
+// # Geometry Size2F <float_t> #
+using Size2F = Size2T<float_t>;
+// # Geometry Size2D <double_t> #
+using Size2D = Size2T<double_t>;
 
-	int32_t left;
-	int32_t top;
-	int32_t right;
-	int32_t bottom;
+// # Geometry Rect4T <Type> #
+template<typename Type>
+struct Rect4T {
+
+	Vertex2T<Type> Location;
+	Size2T<Type> Size;
 
 	//----------------------------------------
 	// Constructors
 
-	Rect4I() noexcept {
-		left = 0;
-		top = 0;
-		right = 0;
-		bottom = 0;
-	}
+	// # Default Constructor Initialize Object with Zeros #
+	Rect4T() noexcept
+		: Location(), Size()
+	{ /*...*/ }
 
-	Rect4I(int32_t initLeft, int32_t initTop,
-		int32_t initRight, int32_t initBottom) noexcept {
-		left = initLeft;
-		top = initTop;
-		right = initRight;
-		bottom = initBottom;
-	}
+	Rect4T(Type x, Type y, Type width, Type height) noexcept
+		: Location(x, y), Size(width, height)
+	{ /*...*/ }
 
-	Rect4I(const Vertex2I &vLeftTop,
-		const Vertex2I &vRightBottom) noexcept {
-		left = vLeftTop.x;
-		top = vLeftTop.y;
-		right = vRightBottom.x;
-		bottom = vRightBottom.y;
-	}
+	Rect4T(const Vertex2T<Type> &Location, const Size2T<Type> &Size) noexcept
+		: Location(Location), Size(Size)
+	{ /*...*/ }
 
 	//----------------------------------------
 
 	// # Copy Constructor #
-	Rect4I(const Rect4I &other) noexcept = default;
+	Rect4T(const Rect4T &other) noexcept = default;
 	// # Copy Assigment Operator #
-	Rect4I& operator=(const Rect4I &other) noexcept = default;
+	Rect4T& operator=(const Rect4T &other) noexcept = default;
 
-	// # Returns Rectangle "Width" #
-	int32_t Width() const noexcept {
-		return (left >= right) ? left - right : right - left;
+	// # Returns Rectangle "Center-Point" Coordinates #
+	Vertex2T<Type> CenterPoint(void) const noexcept {
+		return Vertex2T<Type>(Size.width / 2 + Location.x, Size.height / 2 + Location.y);
 	}
 
-	// # Returns Rectangle "Height" #
-	int32_t Height() const noexcept {
-		return (top >= bottom) ? top - bottom : bottom - top;
-	}
+	// # Returns TRUE If This Rectangle Intersect with Other Rectangle #
+	bool IntersectWith(const Rect4T &other) const noexcept {
 
-	// # Returns Rectangle "LeftTop" Coordinates #
-	Vertex2I LeftTop() const noexcept {
-
-		Vertex2I vLeftTop;
-
-		vLeftTop.x = (left >= right) ? right : left;
-		vLeftTop.y = (top >= bottom) ? bottom : top;
-
-		return vLeftTop;
-
-	}
-
-	// # Returns Rectangle "RightBottom" Coordinates #
-	Vertex2I RightBottom() const noexcept {
-
-		Vertex2I vRightBottom;
-
-		vRightBottom.x = (left >= right) ? left : right;
-		vRightBottom.y = (top >= bottom) ? top : bottom;
-		
-		return vRightBottom;
-
-	}
-
-	// # This Method Normamalizes Rectangle #
-	void NormalizeRect() noexcept {
-		
-		if (left > right) {
-			std::swap(left, right);
+		// # No Intersection Return FALSE #
+		if (other.Location.x + other.Size.width <= Location.x ||
+			other.Location.x >= Location.x + Size.width ||
+			other.Location.y + other.Size.height <= Location.y ||
+			other.Location.y >= Location.y + Size.height) {
+			return false;
 		}
 
-		if (top > bottom){
-			std::swap(top, bottom);
+		// # Intersection Return TRUE #
+		return true;
+
+	}
+
+	// # Returns TRUE If Point is Inside Rectangle #
+	bool PointInRect(const Vertex2T<Type> &point) const noexcept {
+
+		// # Point Outside Rectangle #
+		if (point.x <= Location.x ||
+			point.x >= Location.x + Size.width ||
+			point.y <= Location.y ||
+			point.y >= Location.y + Size.height) {
+			return false;
 		}
 
+		// # Point Inside Rectangle #
+		return true;
+
 	}
 
-	// # Return TRUE If Rectangles Is Equal #
-	bool EqualRect(const Rect4I &other) const noexcept {
-		return LeftTop() == other.LeftTop() && RightBottom() == other.RightBottom();
+	// # Returns TRUE If This Rectangle is Equal with Other Rectangle #
+	bool Equal(const Rect4T &other) const noexcept {
+		return Location == other.Location && Size == other.Size;
 	}
 
-	// # Return TRUE If Rectangle Is (0, 0, 0, 0) #
-	bool IsRectNull() const noexcept {
-		return left == 0 && top == 0 && right == 0 && bottom == 0;
+	// # Returns TRUE If Rectangle Location and Size Is Zero #
+	bool IsNull(void) const noexcept {
+		return Location.IsNull() && Size.IsNull();
 	}
 
-	// # Return TRUE If Rectangle Has No Area #
-	bool IsRectEmpty() const noexcept {
-		return Width() == 0 || Height() == 0;
-	}
-
-	bool operator==(const Rect4I &other) const noexcept {
-		return EqualRect(other);
+	bool operator==(const Rect4T &other) const noexcept {
+		return Equal(other);
 	}
 	
-	bool operator!=(const Rect4I &other) const noexcept {
-		return !EqualRect(other);
+	bool operator!=(const Rect4T &other) const noexcept {
+		return !Equal(other);
 	}
 
 	//----------------------------------------
 	// Serializing
 
-	// Returns "Size2I" Content in JSON Format
-	// "Rect4I": { "left": left, "top": top, "right": right, "bottom": bottom }
-	std::string ToString() const override {
-
-		Vertex2I vLeftTop = LeftTop();
-		Vertex2I vRightBottom = RightBottom();
-
-		return "\"Rect4I\": { \"left\": " + std::to_string(vLeftTop.x)
-			+ ", \"top\": " + std::to_string(vLeftTop.y)
-			+ ", \"right\": " + std::to_string(vRightBottom.x)
-			+ ", \"bottom\": " + std::to_string(vRightBottom.y) + " }";
-
+	// Returns "Rect4T" Content in JSON Format
+	// "Rect4T": { "Vertex2T": { "x": {}, "y": {} }, "Size2T": { "width": {}, "height": {} } })";
+	std::string ToString(void) const {
+		return R"("Rect4I": { )" + Location.ToString()
+			+ R"(, )" + Size.ToString() + R"( })";
 	}
 
 	//----------------------------------------
 
 	// # Default Destructor #
-	~Rect4I() noexcept override = default;
+	~Rect4T() noexcept = default;
 
 };
+
+// # Geometry Rect4S <int16_t> #
+using Rect4S = Rect4T<int16_t>;
+// # Geometry Rect4US <uint16_t> #
+using Rect4US = Rect4T<uint16_t>;
+// # Geometry Rect4I <int32_t> #
+using Rect4I = Rect4T<int32_t>;
+// # Geometry Rect4UI <uint32_t> #
+using Rect4UI = Rect4T<uint32_t>;
+// # Geometry Rect4L <int64_t> #
+using Rect4L = Rect4T<int64_t>;
+// # Geometry Rect4UL <uint64_t> #
+using Rect4UL = Rect4T<uint64_t>;
+// # Geometry Rect4F <float_t> #
+using Rect4F = Rect4T<float_t>;
+// # Geometry Rect4D <double_t> #
+using Rect4D = Rect4T<double_t>;
 
 #endif // !__GRAPHICS_TYPES_H__

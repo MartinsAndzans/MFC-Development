@@ -14,14 +14,14 @@
 #define WIN32_LEAN_AND_MEAN
 
 //===== HEADERS ======//
-#include <memory>
 #ifndef __AFX_H__
 #include <tchar.h>
 #include <Windows.h>
 #endif // !__AFX_H__
+#include <memory>
+#include <fstream>
 #include <string>
 #include <sstream>
-#include <fstream>
 #ifndef _STDINT
 #include <stdint.h>
 #endif // !_STDINT
@@ -64,11 +64,9 @@ struct Algorithms {
 	/// <param name="lpString">String Where Find Character</param>
 	/// <param name="Characater">What Character Find</param>
 	/// <param name="StringLength">String Length</param>
-	/// <returns>
-	/// <para>If Character has been Found Function Returns Character Index</para>
-	/// <para>If Character has not been Found Function Returns MAXSIZE_T Value</para>
-	/// </returns>
-	static size_t FindChar(_In_count_(StringLength) LPCSTR lpString, _In_ char Characater, _In_ size_t StringLength) noexcept {
+	/// <returns><para>If Character has been Found Function Returns Character Index</para>
+	/// <para>If Character has not been Found Function Returns MAXSIZE_T Value</para></returns>
+	static size_t FindChar(_In_count_(StringLength) const char *lpString, _In_ char Characater, _In_ size_t StringLength) noexcept {
 
 		for (size_t i = 0; i < StringLength; i++) {
 			if (lpString[i] == Characater) {
@@ -84,11 +82,9 @@ struct Algorithms {
 	/// <param name="lpString">String Where Find Character</param>
 	/// <param name="UCharacater">What Unicode Character Find</param>
 	/// <param name="StringLength">String Length</param>
-	/// <returns>
-	/// <para>If Character has been Found Function Returns Character Index</para>
-	/// <para>If Character has not been Found Function Returns MAXSIZE_T Value</para>
-	/// </returns>
-	static size_t FindChar(_In_count_(StringLength) LPCWSTR lpString, _In_ wchar_t UCharacater, _In_ size_t StringLength) noexcept {
+	/// <returns><para>If Character has been Found Function Returns Character Index</para>
+	/// <para>If Character has not been Found Function Returns MAXSIZE_T Value</para></returns>
+	static size_t FindChar(_In_count_(StringLength) const wchar_t *lpString, _In_ wchar_t UCharacater, _In_ size_t StringLength) noexcept {
 
 		for (size_t i = 0; i < StringLength; i++) {
 			if (lpString[i] == UCharacater) {
@@ -101,15 +97,15 @@ struct Algorithms {
 	}
 
 	// # This Function Converts all UPPERCASE Letters to lowercase Letters #
-	static void ToLower(_Inout_count_(StringLength) LPSTR lpString, _In_ size_t StringLength) noexcept {
+	static void ToLower(_Inout_count_(StringLength) char *lpString, _In_ size_t StringLength) noexcept {
 
 		// * Start of Upper Case Letters *
-		constexpr int16_t StartUpper = 65;
+		static constexpr int16_t StartUpper = 65;
 		// * End of Upper Case Letters *
-		constexpr int16_t EndUpper = 98;
+		static constexpr int16_t EndUpper = 98;
 
-		// * Difference Between Lower and Upper Case Letters  *
-		constexpr int16_t Difference = 32;
+		// * Difference Between Lower and Upper Case Letters *
+		static constexpr int16_t Difference = 32;
 
 		for (size_t i = 0; i < StringLength; i++) {
 			if (lpString[i] >= StartUpper && lpString[i] <= EndUpper) {
@@ -120,15 +116,15 @@ struct Algorithms {
 	}
 
 	// # This Function Converts all lowercase Letters to UPPERCASE Letters #
-	static void ToUpper(_Inout_count_(StringLength) LPSTR lpString, _In_ size_t StringLength) noexcept {
+	static void ToUpper(_Inout_count_(StringLength) char *lpString, _In_ size_t StringLength) noexcept {
 
 		// * Start of Lower Case Letters *
-		constexpr int16_t StartLower = 97;
+		static constexpr int16_t StartLower = 97;
 		// * End of Lower Case Letters *
-		constexpr int16_t EndLower = 122;
+		static constexpr int16_t EndLower = 122;
 
-		// * Difference Between Lower and Upper Case Letters  *
-		constexpr int16_t Difference = 32;
+		// * Difference Between Lower and Upper Case Letters *
+		static constexpr int16_t Difference = 32;
 
 		for (size_t i = 0; i < StringLength; i++) {
 			if (lpString[i] >= StartLower && lpString[i] <= EndLower) {
@@ -169,8 +165,9 @@ struct Algorithms {
 
 			try {
 				ascii_value = std::stoi(temp);
-			} catch (const std::exception&) {
-				return "Encrypted Text Cannot be Decrypted, because is Corrupted!";
+			} catch (const std::exception &e) {
+				UNREFERENCED_PARAMETER(e);
+				return "";
 			}
 			
 			DecryptedString += static_cast<char>(ascii_value);
@@ -181,93 +178,184 @@ struct Algorithms {
 
 	}
 
-	/// <returns><para>If Succeded Returns 0</para><para>If Failed Returns WINAPI Error Code</para></returns>
-	static _Success_(return == 0) DWORD WINAPI SetClipboardText(_In_ HWND NewClipboardOwner, _In_count_(TextLength) LPCTSTR Text, _In_ size_t TextLength) noexcept {
+	static std::wstring StringToWString(const std::string &String) {
 
-		if (!OpenClipboard(NewClipboardOwner)) {
-			return GetLastError();
+		std::wstring WString;
+		WString.reserve(String.length() + 1);
+
+		for (const char &Character : String) {
+			WString.push_back(static_cast<wchar_t>(Character));
 		}
 
-		if (TextLength == 0) {
-
-			constexpr _TCHAR EmptyString[] = _T("<Empty String>");
-			
-			HGLOBAL hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS, (ARRAYSIZE(EmptyString) + 1) * sizeof(_TCHAR));
-			if (hCopyData == NULL) {
-				CloseClipboard();
-				return GetLastError();
-			}
-
-			LPVOID lpCopyData = nullptr;
-			while (lpCopyData == nullptr)
-				lpCopyData = GlobalLock(hCopyData);
-			memcpy(lpCopyData, EmptyString, ARRAYSIZE(EmptyString) * sizeof(_TCHAR));
-			GlobalUnlock(hCopyData);
-
-			EmptyClipboard();
-			#if defined(UNICODE) || defined(_UNICODE)
-			SetClipboardData(CF_UNICODETEXT, hCopyData);
-			#else // !UNICODE || _UNICODE
-			SetClipboardData(CF_TEXT, hCopyData);
-			#endif // UNICODE || _UNICODE
-			CloseClipboard();
-
-			return 0;
-
-		} else {
-
-			HGLOBAL hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS, (TextLength + 1) * sizeof(_TCHAR));
-			if (hCopyData == NULL) {
-				CloseClipboard();
-				return GetLastError();
-			}
-
-			LPVOID lpCopyData = nullptr;
-			while (lpCopyData == nullptr)
-				lpCopyData = GlobalLock(hCopyData);
-			memcpy(lpCopyData, Text, TextLength * sizeof(_TCHAR));
-			GlobalUnlock(hCopyData);
-
-			EmptyClipboard();
-			#if defined(UNICODE) || defined(_UNICODE)
-			SetClipboardData(CF_UNICODETEXT, hCopyData);
-			#else // !UNICODE || _UNICODE
-			SetClipboardData(CF_TEXT, hCopyData);
-			#endif // UNICODE || _UNICODE
-			CloseClipboard();
-
-			return 0;
-
-		}
+		return WString;
 
 	}
 
-	#if defined(UNICODE) || defined(_UNICODE)
-	/// <returns><para>If Succeded Returns 0</para><para>If Failed Returns WINAPI Error Code</para></returns>
-	static _Success_(return == 0) DWORD WINAPI GetClipboardText(_In_ HWND NewClipboardOwner, _Inout_ std::wstring &StringBuffer) noexcept {
-	#else // !UNICODE || _UNICODE
-	/// <returns><para>If Succeded Returns 0</para><para>If Failed Returns WINAPI Error Code</para></returns>
-	static _Success_(return == 0) DWORD WINAPI GetClipboardText(_In_ HWND NewClipboardOwner, _Inout_ std::string &StringBuffer) noexcept {
-	#endif // UNICODE || _UNICODE
+	/// <param name="NewClipboardOwner">New Clipboard Owner Window Handle - Must Not Be NULL</param>
+	/// <param name="String">What Text Save To Clipboard</param>
+	/// <returns>
+	///	<para>If Succeded Returns 0</para>
+	///	<para>If Failed Returns WINAPI Error Code</para>
+	/// </returns>
+	static _Success_(return == 0) DWORD WINAPI SetClipboardText(_In_opt_ HWND NewClipboardOwner, _In_ const std::string &String) noexcept {
 
 		if (!OpenClipboard(NewClipboardOwner)) {
 			return GetLastError();
 		}
 
-		#if defined(UNICODE) || defined(_UNICODE)
-		HGLOBAL hClipboardData = GetClipboardData(CF_UNICODETEXT);
-		#else // !UNICODE || _UNICODE
-		HGLOBAL hClipboardData = GetClipboardData(CF_TEXT);
-		#endif // UNICODE || _UNICODE
-		if (hClipboardData == NULL) {
-			CloseClipboard();
+		HGLOBAL hCopyData = NULL;
+
+		if (String.empty()) {
+
+			static constexpr char EmptyString[] = "<Empty String>";
+			
+			hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS,
+				(ARRAYSIZE(EmptyString) + 1) * sizeof(char));
+			
+			
+			if (hCopyData == NULL) {
+				DWORD ErrorCode = GetLastError();
+				CloseClipboard();
+				return ErrorCode;
+			}
+
+			#pragma warning(disable:6387)
+			LPVOID lpCopyData = GlobalLock(hCopyData);
+			memcpy(lpCopyData, EmptyString, ARRAYSIZE(EmptyString) * sizeof(char));
+			GlobalUnlock(hCopyData);
+			#pragma warning(default:6387)
+
+		} else {
+
+			hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS,
+				(String.length() + 1) * sizeof(char));
+
+			if (hCopyData == NULL) {
+				DWORD ErrorCode = GetLastError();
+				CloseClipboard();
+				return ErrorCode;
+			}
+
+			#pragma warning(disable:6387)
+			LPVOID lpCopyData = GlobalLock(hCopyData);
+			memcpy(lpCopyData, String.c_str(), String.length() * sizeof(char));
+			GlobalUnlock(hCopyData);
+			#pragma warning(default:6387)
+
+		}
+
+		EmptyClipboard();
+		SetClipboardData(CF_TEXT, hCopyData);
+		CloseClipboard();
+
+		return 0;
+
+	}
+
+	/// <param name="NewClipboardOwner">New Clipboard Owner Window Handle - Must Not Be NULL</param>
+	/// <param name="UString">What UText Save To Clipboard</param>
+	/// <returns>
+	///	<para>If Succeded Returns 0</para>
+	///	<para>If Failed Returns WINAPI Error Code</para>
+	/// </returns>
+	static _Success_(return == 0) DWORD WINAPI SetClipboardText(_In_opt_ HWND NewClipboardOwner, _In_ const std::wstring &UString) noexcept {
+
+		if (!OpenClipboard(NewClipboardOwner)) {
 			return GetLastError();
 		}
 
-		LPVOID lpClipboardData = nullptr;
-		while (lpClipboardData == nullptr)
-			lpClipboardData = GlobalLock(hClipboardData);
-		StringBuffer += reinterpret_cast<LPCTSTR>(lpClipboardData);
+		HGLOBAL hCopyData = NULL;
+
+		if (UString.empty()) {
+
+			static constexpr wchar_t EmptyString[] = L"<Empty Unicode String>";
+
+			hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS,
+				(ARRAYSIZE(EmptyString) + 1) * sizeof(wchar_t));
+
+
+			if (hCopyData == NULL) {
+				DWORD ErrorCode = GetLastError();
+				CloseClipboard();
+				return ErrorCode;
+			}
+
+			#pragma warning(disable:6387)
+			LPVOID lpCopyData = GlobalLock(hCopyData);
+			memcpy(lpCopyData, EmptyString, ARRAYSIZE(EmptyString) * sizeof(wchar_t));
+			GlobalUnlock(hCopyData);
+			#pragma warning(default:6387)
+
+		} else {
+
+			hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS,
+				(UString.length() + 1) * sizeof(wchar_t));
+
+			if (hCopyData == NULL) {
+				DWORD ErrorCode = GetLastError();
+				CloseClipboard();
+				return ErrorCode;
+			}
+
+			#pragma warning(disable:6387)
+			LPVOID lpCopyData = GlobalLock(hCopyData);
+			memcpy(lpCopyData, UString.c_str(), UString.length() * sizeof(wchar_t));
+			GlobalUnlock(hCopyData);
+			#pragma warning(default:6387)
+
+		}
+
+		EmptyClipboard();
+		SetClipboardData(CF_UNICODETEXT, hCopyData);
+		CloseClipboard();
+
+		return 0;
+
+	}
+
+	/// <param name="NewClipboardOwner">New Clipboard Owner Window Handle - Must Not Be NULL</param>
+	/// <param name="StringBuffer">Where To Save Text From Clipboard</param>
+	/// <returns>
+	///	<para>If Succeded Returns 0</para>
+	///	<para>If Failed Returns WINAPI Error Code</para>
+	/// </returns>
+	static _Success_(return == 0) DWORD WINAPI GetClipboardText(_In_opt_ HWND NewClipboardOwner, _Out_ std::string &StringBuffer) {
+
+		// Open Clipboard For Reading
+		if (!OpenClipboard(NewClipboardOwner)) {
+			return GetLastError();
+		}
+
+		DWORD ErrorCode = 0;
+
+		if (!IsClipboardFormatAvailable(CF_TEXT)) {
+			ErrorCode = GetLastError();
+			StringBuffer = "";
+			CloseClipboard();
+			return ErrorCode;
+		}
+
+		// Try Get Clipboard Text
+		HGLOBAL hClipboardData = GetClipboardData(CF_TEXT);
+
+		// Clipboard Doesn't Contain Text
+		if (hClipboardData == NULL) {
+			ErrorCode = GetLastError();
+			StringBuffer = "";
+			CloseClipboard();
+			return ErrorCode;
+		}
+
+		LPCVOID lpClipboardData = GlobalLock(hClipboardData);
+
+		if (lpClipboardData == nullptr) {
+			ErrorCode = GetLastError();
+			StringBuffer = "";
+			CloseClipboard();
+			return ErrorCode;
+		}
+
+		StringBuffer = static_cast<const char*>(lpClipboardData);
 		GlobalUnlock(hClipboardData);
 
 		CloseClipboard();
@@ -276,11 +364,63 @@ struct Algorithms {
 
 	}
 
+	/// <param name="NewClipboardOwner">New Clipboard Owner Window Handle - Must Not Be NULL</param>
+	/// <param name="UStringBuffer">Where To Save UText From Clipboard</param>
+	/// <returns>
+	///	<para>If Succeded Returns 0</para>
+	///	<para>If Failed Returns WINAPI Error Code</para>
+	/// </returns>
+	static _Success_(return == 0) DWORD WINAPI GetClipboardText(_In_opt_ HWND NewClipboardOwner, _Out_ std::wstring &UStringBuffer) {
+
+		// Open Clipboard For Reading
+		if (!OpenClipboard(NewClipboardOwner)) {
+			return GetLastError();
+		}
+		
+		DWORD ErrorCode = 0;
+
+		if (!IsClipboardFormatAvailable(CF_UNICODETEXT)) {
+			ErrorCode = GetLastError();
+			UStringBuffer = L"";
+			CloseClipboard();
+			return ErrorCode;
+		}
+
+		// Try Get Clipboard UText
+		HGLOBAL hClipboardData = GetClipboardData(CF_UNICODETEXT);
+
+		// Clipboard Doesn't Contain UText
+		if (hClipboardData == NULL) {
+			ErrorCode = GetLastError();
+			UStringBuffer = L"";
+			CloseClipboard();
+			return ErrorCode;
+		}
+
+		LPCVOID lpClipboardData = GlobalLock(hClipboardData);
+
+		if (lpClipboardData == nullptr) {
+			ErrorCode = GetLastError();
+			UStringBuffer = L"";
+			CloseClipboard();
+			return ErrorCode;
+		}
+
+		UStringBuffer = static_cast<const wchar_t*>(lpClipboardData);
+		GlobalUnlock(hClipboardData);
+		
+		CloseClipboard();
+
+		return 0;
+
+	}
+
+
 	// # This Function Get WINAPI Error Message From System Resources #
-	static std::string GetWINAPIErrorMessage(_In_ DWORD dwLastError) noexcept {
+	static std::string GetWINAPIErrorMessage(_In_ DWORD dwLastError) {
 
 		//========== ERROR MESSAGE BUFFER ==========//
-		constexpr size_t MAX_CHAR_STRING = 256U;
+		static constexpr size_t MAX_CHAR_STRING = 256U;
 		CHAR LastErrorMessage[MAX_CHAR_STRING] = { ' ', '-', ' ' };
 		//==========================================//
 
@@ -298,26 +438,15 @@ struct Algorithms {
 
 	}
 
-	/// <summary><para>This Function Throws "bad_alloc" and "runtime_error" Exceptions</para></summary>
+	/// <summary>This Function Throws "bad_alloc" and "runtime_error" Exceptions</summary>
 	/// <param name="Bitmap">Handle To Bitmap</param>
-	/// <param name="FilePath">File path with ".bmp" extension</param>
-	/// <param name="BitmapSize">Bitmap size in pixels</param>
-	/// <returns><para>If Succeded Returns TRUE</para><para>If Failed Returns FALSE</para></returns>
-	static void SaveBitmapToFile(_In_ HBITMAP Bitmap, _In_z_ LPCTSTR FilePath, _In_ SIZE BitmapSize)
-		#ifdef _MSVC_LANG
-			#if _MSVC_LANG <= 201402L
-				throw(std::bad_alloc, std::runtime_error)
-			#endif
-		#else
-			#if __cplusplus <= 201402L
-				throw(std::bad_alloc, std::runtime_error)
-			#endif
-		#endif
-		{
+	/// <param name="FilePath">File Path With ".bmp" Extension</param>
+	/// <param name="BitmapSize">Bitmap Size in Pixels</param>
+	static void SaveBitmapToFile(_In_ HBITMAP Bitmap, _In_z_ LPCTSTR FilePath, _In_ SIZE BitmapSize) {
 		
 		std::ofstream image;
 
-		constexpr WORD BM = 0x4D42; // * ASCII 'B' = 0x42 / 'M' = 0x4D *
+		static constexpr WORD BM = 0x4D42; // * ASCII 'B' = 0x42 / 'M' = 0x4D *
 		const DWORD BitmapSizeCXxCY = BitmapSize.cx * BitmapSize.cy; // * Bitmap Size [cx x cy] *
 
 		BITMAPFILEHEADER bmfheader = { 0 };

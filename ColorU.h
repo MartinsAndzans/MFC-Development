@@ -9,9 +9,12 @@
 *************************************************/
 
 //===== HEADERS ======//
-#include "IJType.h"
+#include <string>
 #include <sstream>
 #include <iomanip>
+#ifndef _STDINT
+#include <stdint.h>
+#endif // !_STDINT
 //====================//
 
 //======== REDEFINE MACROS ========//
@@ -19,13 +22,10 @@
 #pragma push_macro("GetRValue")
 #pragma push_macro("GetGValue")
 #pragma push_macro("GetBValue")
-#undef RGB
-#undef GetRValue
-#undef GetGValue
-#undef GetBValue
 //=================================//
 
 #ifndef _MINWINDEF_
+typedef float FLOAT;
 typedef uint8_t BYTE;
 typedef uint16_t WORD;
 typedef uint32_t DWORD;
@@ -34,10 +34,14 @@ typedef uint32_t DWORD;
 typedef DWORD COLORREF;
 #endif // !_WINDEF_
 
+#undef RGB
 // # XX0000FF - Red / 0xXX00FF00 - Green / 0xXXFF0000 - Blue #
 #define RGB(r, g, b) (COLORREF)(((BYTE)(r))|(((WORD)((BYTE)(g)))<<8)|(((DWORD)((BYTE)(b)))<<16))
+#undef GetRValue
 #define GetRValue(rgb) (BYTE)((COLORREF)(rgb))
+#undef GetGValue
 #define GetGValue(rgb) (BYTE)(((WORD)((COLORREF)(rgb)))>>8)
+#undef GetBValue
 #define GetBValue(rgb) (BYTE)(((COLORREF)(rgb))>>16)
 
 //----------------------------------------------------------------
@@ -47,10 +51,10 @@ typedef DWORD COLORREF;
 // Pixel Format
 // - # XX0000FF - Red / 0xXX00FF00 - Green / 0xXXFF0000 - Blue #
 //----------------------------------------------------------------
-class ColorU : implements IJType {
+class ColorU {
 public:
 	
-	enum class Enum : COLORREF {
+	enum Enum : COLORREF {
 		
 		White = RGB(191, 191, 191),
 		Gray = RGB(89, 89, 89),
@@ -80,7 +84,8 @@ public:
 
 	};
 
-	enum class Value : BYTE {
+
+	enum Component : BYTE {
 		R, G, B
 	};
 
@@ -88,13 +93,13 @@ public:
 	// Constructors
 
 	// # Default Constructor "m_rgbColor" = "Black Color" #
-	ColorU() noexcept {
-		m_rgbColor = static_cast<COLORREF>(Enum::Black);
+	ColorU(void) noexcept {
+		m_rgbColor = Enum::Black;
 	}
 
 	// # Known Color #
 	ColorU(Enum KnownColor) noexcept {
-		m_rgbColor = static_cast<COLORREF>(KnownColor);
+		m_rgbColor = KnownColor;
 	}
 
 	// # Color From Byte Values #
@@ -132,7 +137,7 @@ public:
 	
 	// # Known Color #
 	void SetColor(Enum KnownColor) noexcept {
-		m_rgbColor = static_cast<COLORREF>(KnownColor);
+		m_rgbColor = KnownColor;
 	}
 
 	// # Color From Byte Values #
@@ -160,17 +165,19 @@ public:
 
 	//----------------------------------------
 
-	// # Set X Value #
-	void SetXValue(Value Type, BYTE Value) noexcept {
+	/// <summary>This Method Set One Component To Color</summary>
+	/// <param name="Component">R - Red Component / G - Green Component / B - Blue Component</param>
+	/// <param name="Value">New Value For Requested Component</param>
+	void SetXValue(Component Component, BYTE Value) noexcept {
 		
-		switch (Type) {
-		case Value::R:
+		switch (Component) {
+		case Component::R:
 			m_rgbColor = RGB(Value, GetGValue(m_rgbColor), GetBValue(m_rgbColor));
 			break;
-		case Value::G:
+		case Component::G:
 			m_rgbColor = RGB(GetRValue(m_rgbColor), Value, GetBValue(m_rgbColor));
 			break;
-		case Value::B:
+		case Component::B:
 			m_rgbColor = RGB(GetRValue(m_rgbColor), GetGValue(m_rgbColor), Value);
 			break;
 		}
@@ -179,15 +186,16 @@ public:
 	
 	#pragma warning(disable:4715)
 
-	// # Get X Value #
-	BYTE GetXValue(Value Type) const noexcept {
+	/// <param name="Component">R - Red Component / G - Green Component / B - Blue Component</param>
+	/// <returns>Returns Requested Component Value</returns>
+	BYTE GetXValue(Component Component) const noexcept {
 
-		switch (Type) {
-		case Value::R:
+		switch (Component) {
+		case Component::R:
 			return GetRValue(m_rgbColor);
-		case Value::G:
+		case Component::G:
 			return GetGValue(m_rgbColor);
-		case Value::B:
+		case Component::B:
 			return GetBValue(m_rgbColor);
 		}
 
@@ -195,12 +203,16 @@ public:
 
 	#pragma warning(default:4715)
 
-	bool operator==(const ColorU &other) const noexcept {
+	bool Equal(const ColorU &other) const noexcept {
 		return m_rgbColor == other.m_rgbColor;
 	}
 
+	bool operator==(const ColorU &other) const noexcept {
+		return Equal(other);
+	}
+
 	bool operator!=(const ColorU &other) const noexcept {
-		return m_rgbColor != other.m_rgbColor;
+		return !Equal(other);
 	}
 
 	//----------------------------------------
@@ -208,16 +220,13 @@ public:
 
 	// Returns "ColorU" Content in JSON Format
 	// "ColorU": { "m_rgbColor": "0x00BBGGRR" }
-	std::string ToString() const override {
-
-		using ios = std::ios;
-		constexpr ios::fmtflags upperhex = ios::hex | ios::uppercase;
+	std::string ToString(void) const {
 		
 		std::stringstream sstream;
-		sstream << "\"ColorU\": { \"m_rgbColor\": \"0x"
-			<< std::setiosflags(upperhex)
+		sstream << R"("ColorU": { "m_rgbColor": "0x)"
 			<< std::setw(sizeof(m_rgbColor) * 2)
-			<< std::setfill('0') << m_rgbColor << "\" }";
+			<< std::setfill('0') << std::setbase(16)
+			<< std::uppercase << m_rgbColor << R"(" })";
 
 		std::string JsonFormat;
 		std::getline(sstream, JsonFormat);
@@ -228,7 +237,7 @@ public:
 
 	//----------------------------------------
 
-	COLORREF data(void) const noexcept {
+	COLORREF Data(void) const noexcept {
 		return m_rgbColor;
 	}
 
@@ -237,7 +246,7 @@ public:
 	}
 
 	// # Default Destructor #
-	~ColorU() noexcept override = default;
+	~ColorU() noexcept = default;
 
 private:
 
