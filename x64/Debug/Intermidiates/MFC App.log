@@ -1,4 +1,1 @@
-﻿  MFCWindow.cpp
-  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
-D:\Users\marti\Darbavirsma\MFC GUI\MFC App\gdiplus.h(278,1): warning C4267: 'initializing': conversion from 'size_t' to 'INT', possible loss of data
-  MFC App.vcxproj -> D:\Users\marti\Darbavirsma\MFC GUI\MFC App\x64\Debug\App\MFC App - Debug.exe
+﻿  MFC App.vcxproj -> D:\Users\marti\Darbavirsma\MFC GUI\MFC App\x64\Debug\App\MFC App - Debug.exe

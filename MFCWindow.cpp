@@ -11,6 +11,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include "gdiplus.h"
 #include "Algorithms.h"
+#include "WindowsError.h"
 
 #include "Resource.h"
 
@@ -18,57 +19,41 @@ template<typename PixelData>
 class FrameBuffer {
 public:
 	
-	explicit FrameBuffer() {
-
-		m_Width = 2, m_Height = 2;
-		m_FrameBuffer = std::make_unique<PixelData[]>(m_Width * m_Height);
-
+	explicit FrameBuffer()
+		: m_Size() {
+		m_FrameBuffer = std::make_unique<PixelData[]>(m_Size.width * m_Size.height);
 	}
 	
-	explicit FrameBuffer(int32_t width, int32_t height) {
-
-		m_Width = width, m_Height = height;
-		m_FrameBuffer = std::make_unique<PixelData[]>(m_Width * m_Height);
+	explicit FrameBuffer(int32_t width, int32_t height)
+		: m_Size(width, height) {
+		m_FrameBuffer = std::make_unique<PixelData[]>(m_Size.width * m_Size.height);
 		
 	}
 
-	~FrameBuffer() = default;
-
 	void SetPixel(int32_t x, int32_t y, const PixelData &pixelData) noexcept {
 
-		if (x >= 0 && y >= 0 && x < m_Width && y < m_Height) {
-			m_FrameBuffer[y * m_Width + x] = pixelData;
+		if (x >= 0 && y >= 0 && x < m_Size.width && y < m_Size.height) {
+			m_FrameBuffer[y * m_Size.width + x] = pixelData;
 		}
 
 	}
 	
 	PixelData GetPixel(int32_t x, int32_t y) const {
 
-		if (x >= 0 && y >= 0 && x < m_Width && y < m_Height) {
-			return m_FrameBuffer[y * m_Width + x];
+		if (x >= 0 && y >= 0 && x < m_Size.width && y < m_Size.height) {
+			return m_FrameBuffer[y * m_Size.width + x];
 		} else {
 			throw (std::out_of_range("Pixel Outside Frame Buffer"));
 		}
 
 	}
 	
+	~FrameBuffer() noexcept = default;
+	
 private:
 
-	int32_t m_Width, m_Height;
+	Size2I m_Size;
 	std::unique_ptr<PixelData[]> m_FrameBuffer;
-
-};
-
-class IPlayer {
-
-	enum class PlayFrom { Start, Point };
-
-public:
-
-	virtual void Play(PlayFrom PlayParam, uint32_t TimeStamp) = 0;
-	virtual void Pause() = 0;
-	virtual void Resume() = 0;
-	virtual void Stop() = 0;
 
 };
 
@@ -78,12 +63,19 @@ public:
 namespace WinGui {
 	
 	struct MessageBox {
-		
+
 		// # Message Box Icons #
 		enum class Icon : INT16 { Error, Warning, Information, Question };
-
 		enum class Buttons : INT16 { Ok, OkCancel, RetryCancel, YesNo, YesNoCancel, AbortRetryIgnore };
 		enum class DefaultButton : INT16 { Button1, Button2, Button3 };
+		
+		HWND hWndParent;
+		std::wstring Caption;
+		std::wstring Message;
+
+		Icon MsgBoxIcon;
+		Buttons MsgBoxButtons;
+		DefaultButton MsgBoxDefaultButton;
 
 		// # Message Box Results #
 		enum class Result : INT16 { Ok, Cancel, Yes, No, Abort, Retry, Ignore, Error };
@@ -92,30 +84,12 @@ namespace WinGui {
 		// Constructors
 
 		MessageBox() 
-			: m_hWndParent(HWND_DESKTOP), m_Caption(L"Message Box"), m_Message(L"This is Message Box"),
-			m_Icon(Icon::Information), m_Buttons(Buttons::Ok), m_DefaultButton(DefaultButton::Button1)
-		{ /*...*/ }
-
-		MessageBox(const std::wstring &Message)
-			: m_hWndParent(HWND_DESKTOP), m_Caption(L"Message Box"), m_Message(Message),
-			m_Icon(Icon::Information), m_Buttons(Buttons::Ok), m_DefaultButton(DefaultButton::Button1)
-		{ /*...*/ }
-
-		MessageBox(HWND hWndParent, const std::wstring &Message)
-			: m_hWndParent(hWndParent), m_Caption(L"Message Box"), m_Message(Message),
-			m_Icon(Icon::Information), m_Buttons(Buttons::Ok), m_DefaultButton(DefaultButton::Button1)
-		{ /*...*/ }
-
-		MessageBox(HWND hWndParent, const std::wstring &Message, Buttons MsgBoxButons)
-			: m_hWndParent(hWndParent), m_Caption(L"Message Box"), m_Message(Message),
-			m_Icon(Icon::Information), m_Buttons(MsgBoxButons), m_DefaultButton(DefaultButton::Button1)
+			: hWndParent(HWND_DESKTOP), Caption(L"Caption"), Message(L"Message To User"), 
+			MsgBoxIcon(Icon::Information), MsgBoxButtons(Buttons::Ok),
+			MsgBoxDefaultButton(DefaultButton::Button1)
 		{ /*...*/ }
 
 		//----------------------------------------
-
-		void SetMessage(const std::wstring &NewMessage) {
-			m_Message = NewMessage;
-		}
 
 		Result Show() {
 
@@ -127,81 +101,9 @@ namespace WinGui {
 			MessageBoxIndirectW(&MsgBox);
 
 		}
-		
-		static Result WINAPI Show(HWND hWndOwner, const std::wstring &Title, const std::wstring &Message,
-			Icon Icon, Buttons Btns, DefaultButton DefBtn) {
 
-			MSGBOXPARAMSW MsgBox = { 0 };
-			MsgBox.cbSize = sizeof(MSGBOXPARAMSW);
-			
-			MsgBox.dwLanguageId = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
-			
-			MsgBox.hwndOwner = hWndOwner;
-			MsgBox.lpszCaption = Title.c_str();
-			MsgBox.lpszText = Message.c_str();
-
-			DWORD MsgBoxStyle = 0UL;
-
-			switch (Icon) {
-			case Icon::Error:
-				MsgBoxStyle |= MB_ICONERROR; break;
-			case Icon::Warning:
-				MsgBoxStyle |= MB_ICONWARNING; break;
-			case Icon::Information:
-				MsgBoxStyle |= MB_ICONINFORMATION; break;
-			case Icon::Question:
-				MsgBoxStyle |= MB_ICONQUESTION; break;
-			}
-
-			switch (Btns) {
-			case Buttons::Ok:
-				MsgBoxStyle |= MB_OK; break;
-			case Buttons::OkCancel:
-				MsgBoxStyle |= MB_OKCANCEL; break;
-			case Buttons::RetryCancel:
-				MsgBoxStyle |= MB_RETRYCANCEL; break;
-			case Buttons::YesNo:
-				MsgBoxStyle |= MB_YESNO; break;
-			case Buttons::YesNoCancel:
-				MsgBoxStyle |= MB_YESNOCANCEL; break;
-			case Buttons::AbortRetryIgnore:
-				MsgBoxStyle |= MB_ABORTRETRYIGNORE; break;
-			}
-
-			INT result = MessageBoxIndirectW(&MsgBox);
-
-			switch (result) {
-			case IDOK:
-				return Result::Ok;
-			case IDCANCEL:
-				return Result::Cancel;
-			case IDYES:
-				return Result::Yes;
-			case IDNO:
-				return Result::No;
-			case IDABORT:
-				return Result::Abort;
-			case IDRETRY:
-				return Result::Retry;
-			case IDIGNORE:
-				return Result::Ignore;
-			default:
-				return Result::Error;
-			}
-
-
-		}
-
-		private:
-
-			HWND m_hWndParent;
-
-			std::wstring m_Caption;
-			std::wstring m_Message;
-			
-			Icon m_Icon;
-			Buttons m_Buttons;
-			DefaultButton m_DefaultButton;
+		// # Default Destructor #
+		~MessageBox() noexcept = default;
 
 	};
 
@@ -215,8 +117,8 @@ struct Gate {
 		: rcTop(), rcBottom(), Scored(false)
 	{ /*...*/ }
 
-	Gate(const Rect4I &_rcTop, const Rect4I &_rcBottom, bool _Scored)
-		: rcTop(_rcTop), rcBottom(_rcBottom), Scored(_Scored)
+	Gate(const Rect4I &rcTop, const Rect4I &rcBottom, bool Scored)
+		: rcTop(rcTop), rcBottom(rcBottom), Scored(Scored)
 	{ /*...*/ }
 
 	Rect4I rcTop;
@@ -236,8 +138,8 @@ struct Player {
 		: rcPlayer(), Fly(DOWN)
 	{ /*...*/ }
 
-	Player(const Rect4I &_rcPlayer, State _Up)
-		: rcPlayer(_rcPlayer), Fly(_Up)
+	Player(const Rect4I &rcPlayer, State Fly)
+		: rcPlayer(rcPlayer), Fly(Fly)
 	{ /*...*/ }
 
 	Rect4I rcPlayer;
@@ -319,14 +221,14 @@ public:
 		INT32 Y = GetSystemMetrics(SM_CYSCREEN) / 2 - Height / 2;
 		
 		// Window Rectangle
-		CRect WindowRect = { X, Y, X + Width, Y + Height };
+		RECT WindowRect = { X, Y, X + Width, Y + Height };
 		AdjustWindowRect(&WindowRect, Style, NULL);
 
-		m_szMinWindowSize = { WindowRect.Width(), WindowRect.Height()};
+		m_szMinWindowSize = Size2I(WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top);
 		
 		// Create Window
 		if (!this->Create(NULL, _T("Flappy Bird"), Style, WindowRect)) {
-			throw std::runtime_error(Algorithms::GetWINAPIErrorMessage(GetLastError()));
+			throw std::runtime_error(WindowsError(GetLastError()).GetErrorMessage());
 		}
 
 		this->SetIcon(hWindowIcon, FALSE); // Small Icon
@@ -356,8 +258,7 @@ protected:
 
 	afx_msg INT OnCreate(LPCREATESTRUCT lpCreateStruct) {
 
-		if (!m_Font_SegoeUI.CreateFontW(40, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, ANSI_CHARSET,
-			OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, _T("SegoeUI"))) {	
+		if (!m_Font_SegoeUI.CreatePointFont(200, _T("SegoeUI"), this->GetDC())) {	
 			return -1;
 		}
 
@@ -450,8 +351,7 @@ protected:
 		// Collision Detection
 		for (Gate &Gate : m_Gates) {
 
-			Rect4I rcScoreTriger(Gate.rcTop.Location.x, Gate.rcTop.Location.y + Gate.rcTop.Size.height,
-				Gate.rcTop.Size.width, m_CanvasSize.height - Gate.rcTop.Size.width - Gate.rcBottom.Size.width);
+			Rect4I rcScoreTriger(Gate.rcTop.Left(), Gate.rcTop.Bottom(), Gate.rcTop.Size.width, Gate.rcBottom.Top() - Gate.rcTop.Bottom());
 			
   			if (m_Player.rcPlayer.IntersectWith(Gate.rcTop) || m_Player.rcPlayer.IntersectWith(Gate.rcBottom)) {
 
@@ -481,7 +381,6 @@ protected:
 
 				m_Score += 1;
 				Gate.Scored = true;
-				MessageBeep(MB_ICONINFORMATION);
 
 				break;
 
@@ -489,7 +388,7 @@ protected:
 
 		}
 
-		if (m_Player.rcPlayer.Location.y > m_CanvasSize.height || m_Player.rcPlayer.Location.y + m_Player.rcPlayer.Size.height < 0) {
+		if (m_Player.rcPlayer.Top() > m_CanvasSize.height || m_Player.rcPlayer.Bottom() < 0) {
 
 			this->KillTimer(0xFF);
 			m_Gates.clear();
@@ -502,9 +401,8 @@ protected:
 			m_Player.rcPlayer.Size.height = PlayerHeight;
 			m_Player.Fly = Player::State::DOWN;
 			
-			CString GameOver;
-			GameOver.Format(_T("GAME OVER!\nYour Score: %I64d\n"), m_Score);
-			this->MessageBox(GameOver, _T("-- GAME OVER --"), MB_ICONINFORMATION | MB_OK);
+			std::string GameOver = "GAME OVER!\nYour Score: " + std::to_string(m_Score);
+			MessageBoxA(this->GetSafeHwnd(), GameOver.c_str(), "-- GAME OVER --", MB_ICONINFORMATION | MB_OK);
 			
 			m_Score = 0;
 			
@@ -578,7 +476,7 @@ protected:
 
 			// Clear Screen
 			CBrush SkyBlueBrush(ColorU::Enum::LightBlue);
-			GdiPlus::FillRectangle(MemoryDC, { ClientRect.left, ClientRect.top }, { ClientRect.Width(), ClientRect.Height() }, SkyBlueBrush);
+			GdiPlus::FillRectangle(MemoryDC, Vertex2I(), m_CanvasSize, SkyBlueBrush);
 			
 			std::array<ColorU, 3> PlayerColors = {
 				ColorU::Enum::Yellow,
@@ -603,13 +501,19 @@ protected:
 
 			}
 
-			WindowDC.StretchBlt(ClientRect.left, ClientRect.top, ClientRect.Width(), ClientRect.Height(),
+			Rect4I Client(ClientRect.left, ClientRect.top, ClientRect.Width(), ClientRect.Height());
+
+			WindowDC.StretchBlt(Client.Left(), Client.Top(), Client.Size.width, Client.Size.height,
 				&MemoryDC, 0, 0, m_CanvasSize.width, m_CanvasSize.height, SRCCOPY);
 
-			GdiPlus::DrawTextA(WindowDC, { 4, 4 }, { 50, 20 }, "Flappy Bird", m_Font_SegoeUI, ColorU::Enum::Yellow);
+			GdiPlus::DrawText(WindowDC, { 4, 4 }, { 200, 40 }, L"Flappy Bird", m_Font_SegoeUI, ColorU::Enum::Yellow);
 
+			// WinErr Error(0x0000212F);
+			WindowsError Error(0x00000020);
+			Error.Format("Error Codes <ErrorCode/> <ErrorCode/>\n<ErrorCode/> <ErrorCode/> - <ErrorMessage/>");
+			
 			// std::string JSON = GateColors[1].ToString();
-			// GdiPlus::DrawTextT(WindowDC, { 4, 38 }, { 50, 20 }, Algorithms::StringToWString(JSON).c_str(), m_Font_SegoeUI, ColorU::Enum::Yellow);
+			GdiPlus::DrawText(WindowDC, { 4, 38 }, { 600, 40 }, Error.ToString(), m_Font_SegoeUI, ColorU::Enum::Yellow);
 
 			MemoryDC.SelectObject(PrevBitmap);
 		
@@ -637,7 +541,7 @@ protected:
 
 	afx_msg void OnGetMinMaxInfo(LPMINMAXINFO minmax) {
 		
-		minmax->ptMinTrackSize = { m_szMinWindowSize.cx, m_szMinWindowSize.cy };
+		minmax->ptMinTrackSize = { m_szMinWindowSize.width, m_szMinWindowSize.height };
 
 	}
 
@@ -661,7 +565,7 @@ private:
 	CFont m_Font_SegoeUI;
 	//--------------------
 
-	CSize m_szMinWindowSize;
+	Size2I m_szMinWindowSize;
 
 	Size2I m_CanvasSize;
 	UINT64 m_Score;

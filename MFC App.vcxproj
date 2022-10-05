@@ -157,6 +157,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Algorithms.h" />
+    <ClInclude Include="ByteArray.h" />
     <ClInclude Include="ColorU.h" />
     <ClInclude Include="GraphicsTypes.h" />
     <ClInclude Include="IJType.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="Log.h" />
     <ClInclude Include="MFCApp.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="WindowsError.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MFCResources.rc" />

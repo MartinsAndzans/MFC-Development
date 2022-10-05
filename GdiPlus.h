@@ -1,15 +1,16 @@
 #ifndef __GDI_PLUS_H__
 #define __GDI_PLUS_H__
 
-/*************************************************
-*                                                *
-* Copyright(c) 2022 Martins Andzans              *
-*                                                *
-* - In MFC Application                           *
-* - - This Header MUST be Included after <afx.h> *
-*       or other MFC Headers                     *
-*                                                *
-*************************************************/
+/***********************************************
+*                                              *
+* Copyright(c) [2022] Martins Andzans          *
+* Licensed Under [MIT License]                 *
+*                                              *
+* In MFC Application                           *
+* - This Header MUST be Included after <afx.h> *
+*       or other MFC Headers                   *
+*                                              *
+***********************************************/
 
 #ifndef _WIN32
 #error "This SDK Works Only on Windows"
@@ -28,7 +29,6 @@
 #endif // !__AFX_H__
 #include <array>
 #include <vector>
-#include <math.h>
 #ifndef _STDINT
 #include <stdint.h>
 #endif // !__STDINT
@@ -46,251 +46,307 @@ enum class LoadMode : UINT16 {
 
 struct GdiPlus {
 
-	static void WINAPI DrawLine(HDC hdc, const Vertex2I &lineBegin, const Vertex2I &lineEnd,
-		const ColorU &strokeColor = ColorU::Enum::DarkBlue, UINT32 strokeWidth = 1U) {
+	static void _stdcall DrawLine(_In_opt_ HDC hdc, _In_ const Vertex2I &lineBegin, _In_ const Vertex2I &lineEnd,
+		_In_ const ColorU &strokeColor = ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) {
 
-		HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
-		HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
-		
-		MoveToEx(hdc, lineBegin.x, lineBegin.y, nullptr);
-		LineTo(hdc, lineEnd.x, lineEnd.y);
-		
-		SelectObject(hdc, PrevPen);
-		DeleteObject(StrokePen);
+		if (hdc != NULL) {
 
-	}
+			HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
+			HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
 
-	static void WINAPI DrawRectangle(HDC hdc, const Vertex2I &Location, const Size2I &Size,
-		const ColorU &strokeColor = ColorU::Enum::DarkBlue, UINT32 strokeWidth = 1U) noexcept {
+			MoveToEx(hdc, lineBegin.x, lineBegin.y, nullptr);
+			LineTo(hdc, lineEnd.x, lineEnd.y);
 
-		HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
-		HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
-		
-		POINT PointBuffer[] = {
-			{ Location.x, Location.y },
-			{ Location.x + Size.width, Location.y },
-			{ Location.x + Size.width, Location.y + Size.height },
-			{ Location.x, Location.y + Size.height }
-		};
+			SelectObject(hdc, PrevPen);
+			DeleteObject(StrokePen);
 
-		constexpr BYTE PointTypes[] = {
-			PT_MOVETO,
-			PT_LINETO,
-			PT_LINETO,
-			PT_LINETO | PT_CLOSEFIGURE
-		};
-
-		PolyDraw(hdc, PointBuffer, PointTypes, ARRAYSIZE(PointBuffer));
-
-		SelectObject(hdc, PrevPen);
-		DeleteObject(StrokePen);
+		}
 
 	}
 
-	static void WINAPI DrawEllipse(HDC hdc, const Vertex2I &CenterPoint, UINT32 RadiusX, UINT32 RadiusY,
-		const ColorU &strokeColor = ColorU::Enum::DarkBlue, UINT32 strokeWidth = 1U) noexcept {
+	static void _stdcall DrawRectangle(_In_opt_ HDC hdc, _In_ const Vertex2I &Location, _In_ const Size2I &Size,
+		_In_ const ColorU &strokeColor = ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
 
-		HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
-		HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
+		if (hdc != NULL) {
 
-		ArcTo(hdc, CenterPoint.x - RadiusX, CenterPoint.y - RadiusY, CenterPoint.x + RadiusX, CenterPoint.y + RadiusY,
-			CenterPoint.x + RadiusX, CenterPoint.y, CenterPoint.x + RadiusX, CenterPoint.y);
+			HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
+			HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
 
-		SelectObject(hdc, PrevPen);
-		DeleteObject(StrokePen);
-		
+			static constexpr BYTE PointTypes[] = {
+				PT_MOVETO,
+				PT_LINETO,
+				PT_LINETO,
+				PT_LINETO | PT_CLOSEFIGURE
+			};
+
+			POINT PointBuffer[] = {
+				{ Location.x, Location.y },
+				{ Location.x + Size.width, Location.y },
+				{ Location.x + Size.width, Location.y + Size.height },
+				{ Location.x, Location.y + Size.height }
+			};
+
+			PolyDraw(hdc, PointBuffer, PointTypes, ARRAYSIZE(PointBuffer));
+
+			SelectObject(hdc, PrevPen);
+			DeleteObject(StrokePen);
+
+		}
+
 	}
 
-	static void WINAPI DrawBiezerCurve(HDC, Vertex2I, Vertex2I, Vertex2I, Vertex2I, const ColorU &strokeColor, UINT32 strokeWidth) {
+	static void _stdcall DrawEllipse(_In_opt_ HDC hdc, _In_ const Vertex2I &CenterPoint, _In_ UINT32 RadiusX, _In_ UINT32 RadiusY,
+		_In_ const ColorU &strokeColor = ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
 
-		OutputDebugString(_T("Function Is Not Implemented Yet!"));
-		// TODO: Implement Function
+		if (hdc != NULL) {
+
+			HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
+			HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
+
+			ArcTo(hdc, CenterPoint.x - RadiusX, CenterPoint.y - RadiusY, CenterPoint.x + RadiusX, CenterPoint.y + RadiusY,
+				CenterPoint.x + RadiusX, CenterPoint.y, CenterPoint.x + RadiusX, CenterPoint.y);
+
+			SelectObject(hdc, PrevPen);
+			DeleteObject(StrokePen);
+
+		}
 
 	}
 
-	static void WINAPI DrawTriangle(HDC hdc, const std::array<Vertex2I, 3> &Triangle,
-		const ColorU &strokeColor = ColorU::Enum::DarkBlue, UINT32 strokeWidth = 1U) noexcept {
+	static void _stdcall DrawTriangle(_In_opt_ HDC hdc, _In_ const std::array<Vertex2I, 3> &Triangle,
+		_In_ const ColorU &strokeColor = ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
 
-		HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
-		HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
+		if (hdc != NULL) {
 
-		POINT PointBuffer[] = {
-			{ Triangle[0].x, Triangle[0].y },
-			{ Triangle[1].x, Triangle[1].y },
-			{ Triangle[2].x, Triangle[2].y }
-		};
+			HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
+			HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
 
-		constexpr BYTE PointTypes[] = {
-			PT_MOVETO,
-			PT_LINETO,
-			PT_LINETO | PT_CLOSEFIGURE
-		};
+			static constexpr BYTE PointTypes[] = {
+				PT_MOVETO,
+				PT_LINETO,
+				PT_LINETO | PT_CLOSEFIGURE
+			};
 
-		PolyDraw(hdc, PointBuffer, PointTypes, ARRAYSIZE(PointBuffer));
+			POINT PointBuffer[] = {
+				{ Triangle[0].x, Triangle[0].y },
+				{ Triangle[1].x, Triangle[1].y },
+				{ Triangle[2].x, Triangle[2].y }
+			};
 
-		SelectObject(hdc, PrevPen);
-		DeleteObject(StrokePen);
+			PolyDraw(hdc, PointBuffer, PointTypes, ARRAYSIZE(PointBuffer));
+
+			SelectObject(hdc, PrevPen);
+			DeleteObject(StrokePen);
+
+		}
 
 	}
 
 	template<size_t ArraySize>
-	static void WINAPI DrawGeometry(HDC hdc, const std::array<Vertex2I, ArraySize> &VertexBuffer,
-		const ColorU &strokeColor = ColorU::Enum::DarkBlue, UINT32 strokeWidth = 1U) noexcept {
+	static void _stdcall DrawGeometry(_In_opt_ HDC hdc, _In_ const std::array<Vertex2I, ArraySize> &VertexBuffer,
+		_In_ const ColorU &strokeColor = ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
 		
 		static_assert(ArraySize >= 1, "At Least ONE Vertice is Required");
 
-		HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
-		HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
+		if (hdc != NULL) {
 
-		switch (VertexBuffer.size()) {
-		case 1U: // DOT
-			MoveToEx(hdc, VertexBuffer[0].x, VertexBuffer[0].y, nullptr);
-			LineTo(hdc, VertexBuffer[0].x, VertexBuffer[0].y);
-			break;
-		case 2U: // LINE
-			MoveToEx(hdc, VertexBuffer[0].x, VertexBuffer[0].y, nullptr);
-			LineTo(hdc, VertexBuffer[1].x, VertexBuffer[1].y);
-			break;
-		default: // OTHER GEOMETRY
+			HPEN StrokePen = CreatePen(PS_SOLID, strokeWidth, strokeColor);
+			HGDIOBJ PrevPen = SelectObject(hdc, StrokePen);
 
-			POINT PointBuffer[ArraySize] = { 0 };
-			BYTE PointTypes[ArraySize] = { 0 };
+			switch (ArraySize) {
+			case 1U: // # Pixel #
+				
+				MoveToEx(hdc, VertexBuffer[0].x, VertexBuffer[0].y, nullptr);
+				LineTo(hdc, VertexBuffer[0].x, VertexBuffer[0].y);
+				break;
+			
+			case 2U: // # Line #
+				
+				MoveToEx(hdc, VertexBuffer[0].x, VertexBuffer[0].y, nullptr);
+				LineTo(hdc, VertexBuffer[1].x, VertexBuffer[1].y);
+				break;
+			
+			default: // # Other Geometry #
 
-			for (size_t i = 0; i < ARRAYSIZE(PointBuffer); i++) {
+				BYTE PointTypes[ArraySize] = { 0 };
+				POINT PointBuffer[ArraySize] = { 0 };
 
-				PointBuffer[i].x = VertexBuffer[i].x;
-				PointBuffer[i].y = VertexBuffer[i].y;
+				for (size_t i = 0; i < ARRAYSIZE(PointBuffer); i++) {
 
-				if (i == 0) {
-					PointTypes[i] = PT_MOVETO;
-				} else if (i == ARRAYSIZE(PointBuffer) - 1) {
-					PointTypes[i] = PT_LINETO | PT_CLOSEFIGURE;
-				} else {
-					PointTypes[i] = PT_LINETO;
+					PointBuffer[i].x = VertexBuffer[i].x;
+					PointBuffer[i].y = VertexBuffer[i].y;
+
+					if (i == 0) {
+						PointTypes[i] = PT_MOVETO;
+					} else if (i == ARRAYSIZE(PointBuffer) - 1) {
+						PointTypes[i] = PT_LINETO | PT_CLOSEFIGURE;
+					} else {
+						PointTypes[i] = PT_LINETO;
+					}
+
 				}
+
+				PolyDraw(hdc, PointBuffer, PointTypes, ARRAYSIZE(PointBuffer));
+
+				break;
 
 			}
 
-			PolyDraw(hdc, PointBuffer, PointTypes, ARRAYSIZE(PointBuffer));
-			
-			break;
+			SelectObject(hdc, PrevPen);
+			DeleteObject(StrokePen);
 
 		}
 
-		SelectObject(hdc, PrevPen);
-		DeleteObject(StrokePen);
-
 	}
 
-	static void WINAPI FillRectangle(HDC hdc, const Vertex2I &Location, const Size2I &Size, HBRUSH hBrush) noexcept {
+	static void _stdcall FillRectangle(_In_opt_ HDC hdc,
+		_In_ const Vertex2I &Location, _In_ const Size2I &Size, _In_ HBRUSH hBrush) noexcept {
 
-		HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
+		if (hdc != NULL) {
 
-		HGDIOBJ PrevPen = SelectObject(hdc, InvisiblePen);
-		HGDIOBJ PrevBrush = SelectObject(hdc, hBrush);
+			HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
 
-		POINT PointBuffer[] = {
-			{ Location.x, Location.y },
-			{ Location.x + Size.width, Location.y },
-			{ Location.x + Size.width, Location.y + Size.height },
-			{ Location.x, Location.y + Size.height }
-		};
+			HGDIOBJ PrevPen = SelectObject(hdc, InvisiblePen);
+			HGDIOBJ PrevBrush = SelectObject(hdc, hBrush);
 
-		Polygon(hdc, PointBuffer, ARRAYSIZE(PointBuffer));
+			POINT PointBuffer[] = {
+				{ Location.x, Location.y },
+				{ Location.x + Size.width, Location.y },
+				{ Location.x + Size.width, Location.y + Size.height },
+				{ Location.x, Location.y + Size.height }
+			};
+
+			Polygon(hdc, PointBuffer, ARRAYSIZE(PointBuffer));
+
+			SelectObject(hdc, PrevPen);
+			SelectObject(hdc, PrevBrush);
+
+		}
 		
-		SelectObject(hdc, PrevPen);
-		SelectObject(hdc, PrevBrush);
-		
 	}
 
-	static void WINAPI FillEllipse(HDC hdc, const Vertex2I &CenterPoint, UINT32 RadiusX, UINT32 RadiusY, HBRUSH hBrush) noexcept {
+	static void _stdcall FillEllipse(_In_opt_ HDC hdc, _In_ const Vertex2I &CenterPoint,
+		_In_ UINT32 RadiusX, _In_ UINT32 RadiusY, _In_ HBRUSH hBrush) noexcept {
 
-		HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
+		if (hdc != NULL) {
 
-		HGDIOBJ PrevPen = SelectObject(hdc, InvisiblePen);
-		HGDIOBJ PrevBrush = SelectObject(hdc, hBrush);
+			HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
 
-		Ellipse(hdc, CenterPoint.x - RadiusX - 1, CenterPoint.y - RadiusY - 1, CenterPoint.x + RadiusX + 1, CenterPoint.y + RadiusY + 1);
+			HGDIOBJ PrevPen = SelectObject(hdc, InvisiblePen);
+			HGDIOBJ PrevBrush = SelectObject(hdc, hBrush);
 
-		SelectObject(hdc, PrevPen);
-		SelectObject(hdc, PrevBrush);
+			Ellipse(hdc, CenterPoint.x - RadiusX - 1, CenterPoint.y - RadiusY - 1,
+				CenterPoint.x + RadiusX + 1, CenterPoint.y + RadiusY + 1);
+
+			SelectObject(hdc, PrevPen);
+			SelectObject(hdc, PrevBrush);
+
+		}
 
 	}
 
-	static void WINAPI FillTriangle(HDC hdc, const std::array<Vertex2I, 3> &Triangle, HBRUSH hBrush) noexcept {
+	static void _stdcall FillTriangle(_In_opt_ HDC hdc,
+		_In_ const std::array<Vertex2I, 3> &Triangle, _In_ HBRUSH hBrush) noexcept {
 
-		HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
+		if (hdc != NULL) {
 
-		HGDIOBJ PrevPen = SelectObject(hdc, InvisiblePen);
-		HGDIOBJ PrevBrush = SelectObject(hdc, hBrush);
+			HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
 
-		POINT PointBuffer[] = {
-			{ Triangle[0].x, Triangle[0].y },
-			{ Triangle[1].x, Triangle[1].y },
-			{ Triangle[2].x, Triangle[2].y }
-		};
+			HGDIOBJ PrevPen = SelectObject(hdc, InvisiblePen);
+			HGDIOBJ PrevBrush = SelectObject(hdc, hBrush);
 
-		Polygon(hdc, PointBuffer, ARRAYSIZE(PointBuffer));
+			POINT PointBuffer[] = {
+				{ Triangle[0].x, Triangle[0].y },
+				{ Triangle[1].x, Triangle[1].y },
+				{ Triangle[2].x, Triangle[2].y }
+			};
 
-		SelectObject(hdc, PrevPen);
-		SelectObject(hdc, PrevBrush);
+			Polygon(hdc, PointBuffer, ARRAYSIZE(PointBuffer));
+
+			SelectObject(hdc, PrevPen);
+			SelectObject(hdc, PrevBrush);
+
+		}
 
 	}
 
 	template<size_t ArraySize>
-	static void WINAPI FillGeometry(HDC hdc, const std::array<Vertex2I, ArraySize> &VertexBuffer, HBRUSH hBrush) noexcept {
+	static void _stdcall FillGeometry(_In_opt_ HDC hdc,
+		_In_ const std::array<Vertex2I, ArraySize> &VertexBuffer, _In_ HBRUSH hBrush) noexcept {
 
-		static_assert(ArraySize >= 2, "At Least TWO Vertices is Required");
+		if (hdc != NULL) {
 
-		HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
+			static_assert(ArraySize >= 3, "At Least THREE Vertices is Required");
 
-		HGDIOBJ PrevPen = SelectObject(hdc, InvisiblePen);
-		HGDIOBJ PrevBrush = SelectObject(hdc, hBrush);
+			HPEN InvisiblePen = (HPEN)(GetStockObject(NULL_PEN));
 
-		INT32 PrevMode = SetPolyFillMode(hdc, WINDING);
-		
-		POINT PointBuffer[ArraySize] = {0};
-		
-		for (size_t i = 0; i < ArraySize; i++) {
-			PointBuffer[i].x = VertexBuffer[i].x;
-			PointBuffer[i].y = VertexBuffer[i].y;
+			HGDIOBJ PrevPen = SelectObject(hdc, InvisiblePen);
+			HGDIOBJ PrevBrush = SelectObject(hdc, hBrush);
+
+			INT32 PrevMode = SetPolyFillMode(hdc, WINDING);
+
+			POINT PointBuffer[ArraySize] = { 0 };
+
+			for (size_t i = 0; i < ArraySize; i++) {
+				PointBuffer[i].x = VertexBuffer[i].x;
+				PointBuffer[i].y = VertexBuffer[i].y;
+			}
+
+			Polygon(hdc, PointBuffer, ARRAYSIZE(PointBuffer));
+
+			SetPolyFillMode(hdc, PrevMode);
+
+			SelectObject(hdc, PrevPen);
+			SelectObject(hdc, PrevBrush);
+
 		}
-
-		Polygon(hdc, PointBuffer, ARRAYSIZE(PointBuffer));
-		
-		SetPolyFillMode(hdc, PrevMode);
-
-		SelectObject(hdc, PrevPen);
-		SelectObject(hdc, PrevBrush);
 
 	}
 
 	#pragma push_macro("DrawText")
 	#undef DrawText
 
-	static Size2I WINAPI DrawTextA(_In_ HDC hdc, _In_ const Vertex2I &Location, _In_ const Size2I &Size,
+	static void _stdcall DrawText(_In_ HDC hdc, _In_ const Vertex2I &Location, _In_ const Size2I &Size,
 		_In_ const std::string &String, _In_ HFONT TextFont, _In_ const ColorU &TextColor = ColorU::Enum::DarkBlue) {
 
 		COLORREF PrevColor = SetTextColor(hdc, TextColor);
 		HGDIOBJ PrevFont = SelectObject(hdc, TextFont);
 
-		SIZE szTextSize = { 0 };
-		INT TextLength = String.length();
+		RECT rcClipingRect = {
+			Location.x,
+			Location.y,
+			Location.x + Size.width,
+			Location.y + Size.height
+		};
 
-		GetTextExtentPoint32A(hdc, String.c_str(), TextLength, &szTextSize);
-
-
-
-		TextOutA(hdc, Location.x, Location.y, String.c_str(), TextLength);
+		static constexpr UINT Flags = DT_LEFT | DT_SINGLELINE | DT_END_ELLIPSIS;
+		DrawTextA(hdc, String.c_str(), (INT)(String.length()), &rcClipingRect, Flags);
 
 		SetTextColor(hdc, PrevColor);
 		SelectObject(hdc, PrevFont);
 
-		return { szTextSize.cx, szTextSize.cy };
-
 	}
 
-	#pragma pop_macro("DrawText")
+	static void _stdcall DrawText(_In_ HDC hdc, _In_ const Vertex2I &Location, _In_ const Size2I &Size,
+		_In_ const std::wstring &String, _In_ HFONT TextFont, _In_ const ColorU &TextColor = ColorU::Enum::DarkBlue) {
+
+		COLORREF PrevColor = SetTextColor(hdc, TextColor);
+		HGDIOBJ PrevFont = SelectObject(hdc, TextFont);
+
+		RECT rcClipingRect = {
+			Location.x,
+			Location.y,
+			Location.x + Size.width,
+			Location.y + Size.height
+		};
+		
+		static constexpr UINT Flags = DT_LEFT | DT_SINGLELINE | DT_END_ELLIPSIS;
+		DrawTextW(hdc, String.c_str(), (INT)(String.length()), &rcClipingRect, Flags);
+
+		SetTextColor(hdc, PrevColor);
+		SelectObject(hdc, PrevFont);
+
+	}
 
 	/// <summary>This Function Draw Image From File with ".bmp" Extension or Application Resource</summary>
 	/// <param name="FileName">More Information is Located in "Mode" Parameter Anotation</param>
@@ -352,7 +408,7 @@ struct GdiPlus {
 
 	template<size_t ArraySize>
 	static void WINAPI FillGradientH(HDC hdc, const Vertex2I &Location, const Size2I &Size,
-		const std::array<ColorU, ArraySize> &ColorCollection = { ColorU::Enum::DarkBlue, ColorU::Enum::LightBlue, ColorU::Enum::DarkBlue }) noexcept {
+		const std::array<ColorU, ArraySize> &ColorCollection) noexcept {
 
 		static_assert(ArraySize >= 2, "At Least TWO Colors is Required");
 
@@ -418,7 +474,7 @@ struct GdiPlus {
 
 	template<size_t ArraySize>
 	static void WINAPI FillGradientV(HDC hdc, const Vertex2I &Location, const Size2I &Size,
-		const std::array<ColorU, ArraySize> &ColorCollection = { ColorU::Enum::DarkBlue, ColorU::Enum::LightBlue, ColorU::Enum::DarkBlue }) {
+		const std::array<ColorU, ArraySize> &ColorCollection) {
 
 		static_assert(ArraySize >= 2, "At Least TWO Colors is Required");
 

@@ -30,15 +30,20 @@
 struct Algorithms {
 
 	// # This Function Reverse Number #
-	static constexpr uint64_t ReverseNumber(_In_ uint64_t Number) noexcept {
+	static constexpr uint32_t ReverseNumber(_In_ uint32_t Number) noexcept {
 
-		uint64_t ReversedNumber = 0;
+		uint32_t ReversedNumber = 0;
 		
 		/* Reverse Number */
 		while (Number != 0) {
-			ReversedNumber *= 10; // # Add zero to "ReversedNumber" #
-			ReversedNumber += Number % 10; // # Get last digit from "Number" and add to "ReversedNumber" #
-			Number /= 10; // # Remove last digit from "Number" #
+
+			// # Add zero to "ReversedNumber" #
+			ReversedNumber *= 10;
+			// # Get last digit from "Number" and add to "ReversedNumber" #
+			ReversedNumber += Number % 10;
+			// # Remove last digit from "Number" #
+			Number /= 10;
+
 		}
 
 		return ReversedNumber;
@@ -46,14 +51,18 @@ struct Algorithms {
 	}
 
 	// # This Function Sum all "Number" digits #
-	static constexpr uint64_t SumDigits(_In_ uint64_t Number) noexcept {
+	static constexpr uint32_t SumDigits(_In_ uint32_t Number) noexcept {
 
-		uint64_t Sum = 0;
+		uint32_t Sum = 0;
 
 		/* Sum Digits */
 		while (Number != 0) {
-			Sum += Number % 10; // # Get last digit from "Number" and add to "Sum" #
-			Number /= 10; // # Remove last digit from "Number" #
+
+			// # Get last digit from "Number" and add to "Sum" #
+			Sum += Number % 10;
+			// # Remove last digit from "Number" #
+			Number /= 10;
+
 		}
 
 		return Sum;
@@ -178,7 +187,7 @@ struct Algorithms {
 
 	}
 
-	static std::wstring StringToWString(const std::string &String) {
+	static std::wstring StringToWideString(const std::string &String) {
 
 		std::wstring WString;
 		WString.reserve(String.length() + 1);
@@ -211,7 +220,6 @@ struct Algorithms {
 			
 			hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS,
 				(ARRAYSIZE(EmptyString) + 1) * sizeof(char));
-			
 			
 			if (hCopyData == NULL) {
 				DWORD ErrorCode = GetLastError();

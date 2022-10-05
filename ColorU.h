@@ -1,17 +1,15 @@
 #ifndef __COLOR_U_H__
 #define __COLOR_U_H__
 
-/*************************************************
-*                                                *
-* Copyright(c) 2022 Martins Andzans              *
-* Licensed Under MIT License                     *
-*                                                *
-*************************************************/
+/**************************************
+*                                     *
+* Copyright(c) [2022] Martins Andzans *
+* Licensed Under [MIT License]        *
+*                                     *
+**************************************/
 
 //===== HEADERS ======//
 #include <string>
-#include <sstream>
-#include <iomanip>
 #ifndef _STDINT
 #include <stdint.h>
 #endif // !_STDINT
@@ -25,13 +23,18 @@
 //=================================//
 
 #ifndef _MINWINDEF_
-typedef float FLOAT;
-typedef uint8_t BYTE;
-typedef uint16_t WORD;
-typedef uint32_t DWORD;
+#ifdef __GRAPHICS_TYPES_H__
+using FLOAT = float_t;
+#else // !__GRAPHICS_TYPES_H__
+using FLOAT = float;
+#endif // __GRAPHICS_TYPES_H__
+using BYTE = uint8_t;
+using WORD = uint16_t;
+using DWORD = uint32_t;
 #endif // !_MINWINDEF_
 #ifndef _WINDEF_
-typedef DWORD COLORREF;
+using COLORREF = DWORD;
+using LPCOLORREF = *COLORREF;
 #endif // !_WINDEF_
 
 #undef RGB
@@ -46,7 +49,7 @@ typedef DWORD COLORREF;
 
 //----------------------------------------------------------------
 // Class "ColorU"
-// - This Class Provides Functionality For RGB Color Manipulations
+// - This Class Provides Functionality For GDI Compatible RGB Color Manipulations
 // ---------------------------------------------------------------
 // Pixel Format
 // - # XX0000FF - Red / 0xXX00FF00 - Green / 0xXXFF0000 - Blue #
@@ -92,7 +95,7 @@ public:
 	//----------------------------------------
 	// Constructors
 
-	// # Default Constructor "m_rgbColor" = "Black Color" #
+	// # Default Constructor Initializes Color To Black #
 	ColorU(void) noexcept {
 		m_rgbColor = Enum::Black;
 	}
@@ -165,12 +168,12 @@ public:
 
 	//----------------------------------------
 
-	/// <summary>This Method Set One Component To Color</summary>
+	/// <summary>This Method Set Requested Color Component To Value</summary>
 	/// <param name="Component">R - Red Component / G - Green Component / B - Blue Component</param>
-	/// <param name="Value">New Value For Requested Component</param>
-	void SetXValue(Component Component, BYTE Value) noexcept {
+	/// <param name="Value">New Value For Requested Color Component</param>
+	void SetXValue(Component crComponent, BYTE Value) noexcept {
 		
-		switch (Component) {
+		switch (crComponent) {
 		case Component::R:
 			m_rgbColor = RGB(Value, GetGValue(m_rgbColor), GetBValue(m_rgbColor));
 			break;
@@ -184,13 +187,14 @@ public:
 
 	}
 	
+	// ! Not All Control Path Return Value - In Reality All Control Path Return Value !
 	#pragma warning(disable:4715)
 
 	/// <param name="Component">R - Red Component / G - Green Component / B - Blue Component</param>
-	/// <returns>Returns Requested Component Value</returns>
-	BYTE GetXValue(Component Component) const noexcept {
+	/// <returns>Requested Color Component Value</returns>
+	BYTE GetXValue(Component crComponent) const noexcept {
 
-		switch (Component) {
+		switch (crComponent) {
 		case Component::R:
 			return GetRValue(m_rgbColor);
 		case Component::G:
@@ -219,25 +223,16 @@ public:
 	// Serializing
 
 	// Returns "ColorU" Content in JSON Format
-	// "ColorU": { "m_rgbColor": "0x00BBGGRR" }
+	// { "Red": {}, "Green": {}, "Blue": {} }
 	std::string ToString(void) const {
-		
-		std::stringstream sstream;
-		sstream << R"("ColorU": { "m_rgbColor": "0x)"
-			<< std::setw(sizeof(m_rgbColor) * 2)
-			<< std::setfill('0') << std::setbase(16)
-			<< std::uppercase << m_rgbColor << R"(" })";
-
-		std::string JsonFormat;
-		std::getline(sstream, JsonFormat);
-
-		return JsonFormat;
-
+		return R"({ "Red": )" + std::to_string(GetRValue(m_rgbColor)) + R"(, "Green": )"
+			+ std::to_string(GetGValue(m_rgbColor)) + R"(, "Blue": )"
+			+ std::to_string(GetBValue(m_rgbColor)) + R"( })";
 	}
 
 	//----------------------------------------
 
-	COLORREF Data(void) const noexcept {
+	COLORREF data(void) const noexcept {
 		return m_rgbColor;
 	}
 

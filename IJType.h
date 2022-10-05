@@ -36,7 +36,7 @@
 //----------------------------------------
 // Virtual Methods Return Value
 //----------------------------------------
-// - "ToString" or "ToWString" Return Value Is Passed to Output Stream
+// - "ToStringA" or "ToStringW" Return Value Is Passed to Output Stream
 //----------------------------------------
 interface IJType {
 
@@ -70,13 +70,13 @@ interface IJType {
 
 	virtual ~IJType() noexcept = default;
 	
-	// # !IMPORTANT! : This Operator Call "ToString" Method #
+	// # !IMPORTANT! : This Operator Call "ToStringA" Method #
 	friend std::ostream& operator<<(std::ostream &outStream, const IJType &Object) {
 		outStream << Object.ToStringA();
 		return outStream;
 	}
 	
-	// # !IMPORTANT! : This Operator Call "ToWString" Method #
+	// # !IMPORTANT! : This Operator Call "ToStringW" Method #
 	friend std::wostream& operator<<(std::wostream &outStream, const IJType &Object) {
 		outStream << Object.ToStringW();
 		return outStream;

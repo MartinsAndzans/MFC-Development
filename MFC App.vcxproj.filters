@@ -36,6 +36,12 @@
     <Filter Include="Graphics">
       <UniqueIdentifier>{fa0622d1-5a62-4119-98df-a6bd69953d8c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Collections">
+      <UniqueIdentifier>{0e9b4dd6-8874-4864-9787-0639ee952c09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WinError">
+      <UniqueIdentifier>{5b113cfa-8b88-41ef-946a-bb176fac3eee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MFCResources.rc">
@@ -82,6 +88,12 @@
     </ClInclude>
     <ClInclude Include="ColorU.h">
       <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ByteArray.h">
+      <Filter>Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowsError.h">
+      <Filter>WinError</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

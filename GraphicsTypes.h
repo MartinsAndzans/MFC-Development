@@ -1,23 +1,29 @@
 #ifndef __GRAPHICS_TYPES_H__
 #define __GRAPHICS_TYPES_H__
 
-/************************************
-*                                   *
-* Copyright(c) 2022 Martins Andzans *
-* Licensed Under MIT License        *
-*                                   *
-************************************/
+/**************************************
+*                                     *
+* Copyright(c) [2022] Martins Andzans *
+* Licensed Under [MIT License]        *
+*                                     *
+**************************************/
 
 //===== HEADERS ======//
 #include <string>
-#include <utility>
 #ifndef _STDINT
 #include <stdint.h>
 #endif // !_STDINT
 //====================//
 
+#ifndef _INC_MATH
+#if defined(_M_IX86) && _M_IX86_FP < 2 && !defined(_M_FP_FAST)
+using float_t = long double;
+using double_t = long double;
+#elif !defined(_M_IX86) || _M_IX86_FP >= 2 || defined(_M_FP_FAST)
 using float_t = float;
 using double_t = double;
+#endif // defined(_M_IX86) && _M_IX86_FP < 2 && !defined(_M_FP_FAST)
+#endif // !_INC_MATH
 
 // # Geometry Vertex2T <Type> #
 template<typename Type>
@@ -29,7 +35,7 @@ struct Vertex2T {
 	//----------------------------------------
 	// Constructors
 
-	// # Default Constructor Initialize Object with Zeros #
+	// # Default Constructor Initialize Object With Zeros #
 	Vertex2T(void) noexcept
 		: x(0), y(0)
 	{ /*...*/ }
@@ -65,18 +71,20 @@ struct Vertex2T {
 		y += yOffset;
 	}
 
-	// # Offset This Object Location To Other Object Location #
+	// # Offset This Location To Other Location #
 	void Offset(const Vertex2T &offset) noexcept {
 		x += offset.x;
 		y += offset.y;
 	}
 
-	// # Returns TRUE If This Object Location is Equal with Other Object Location #
+	// Returns TRUE:
+	// - If This Location Is Equal With Other Location
 	bool Equal(const Vertex2T &other) const noexcept {
 		return x == other.x && y == other.y;
 	}
 
-	// # Returns TRUE If X and Y is Zero #
+	// Returns TRUE:
+	// - If X And Y Is Zero
 	bool IsNull(void) const noexcept {
 		return x == 0 && y == 0;
 	}
@@ -93,9 +101,9 @@ struct Vertex2T {
 	// Serializing
 
 	// Returns "Vertex2T" Content in JSON Format
-	// "Vertex2T": { "x": {}, "y": {} }
+	// { "x": {}, "y": {} }
 	std::string ToString(void) const {
-		return R"("Vertex2T": { "x": )" + std::to_string(x) +
+		return R"({ "x": )" + std::to_string(x) +
 			   R"(, "y": )" + std::to_string(y) + R"( })";
 	}
 
@@ -133,7 +141,7 @@ struct Size2T {
 	//----------------------------------------
 	// Constructors
 
-	// # Default Constructor Initialize Object with Zeros #
+	// # Default Constructor Initialize Object With Zeros #
 	Size2T() noexcept
 		: width(0), height(0)
 	{ /*...*/ }
@@ -156,22 +164,24 @@ struct Size2T {
 
 	// # Scales This Object Size By Given Factor >= 1 #
 	void Scale(int16_t wFactor, int16_t hFactor) noexcept {
-		(wFactor > 1) ? width *= wFactor : width;
-		(hFactor > 1) ? height *= hFactor : height;
+		width = (wFactor > 1) ? width * wFactor : width;
+		height = (hFactor > 1) ? height * hFactor : height;
 	}
 
 	// # Scales This Object Size By Given Factor >= 1 #
 	void Scale(float_t wFactor, float_t hFactor) noexcept {
-		(wFactor > 1.0F) ? width = static_cast<Type>(width * wFactor) : width;
-		(hFactor > 1.0F) ? height = static_cast<Type>(height * hFactor) : height;
+		width = (wFactor > 1.0F) ? static_cast<Type>(width * wFactor) : width;
+		height = (hFactor > 1.0F) ? static_cast<Type>(height * hFactor) : height;
 	}
 
-	// # Returns TRUE If This Object Size is Equal with Other Object Size #
+	// Returns TRUE:
+	// - If This Size Is Equal With Other Size
 	bool Equal(const Size2T &other) const noexcept {
 		return width == other.width && height == other.height;
 	}
 
-	// # Returns TRUE If Width and Height is Zero #
+	// Returns TRUE:
+	// - If Width And Height Is Zero
 	bool IsNull(void) const noexcept {
 		return width == 0 && height == 0;
 	}
@@ -188,9 +198,9 @@ struct Size2T {
 	// Serializing
 
 	// Returns "Size2T" Content in JSON Format
-	// "Size2T": { "width": {}, "height": {} }
+	// { "width": {}, "height": {} }
 	std::string ToString(void) const {
-		return R"("Size2T": { "width": )" + std::to_string(width)
+		return R"({ "width": )" + std::to_string(width)
 			+ R"(, "height": )" + std::to_string(height) + R"( })";
 	}
 
@@ -228,7 +238,7 @@ struct Rect4T {
 	//----------------------------------------
 	// Constructors
 
-	// # Default Constructor Initialize Object with Zeros #
+	// # Default Constructor Initialize Object With Zeros #
 	Rect4T() noexcept
 		: Location(), Size()
 	{ /*...*/ }
@@ -248,19 +258,46 @@ struct Rect4T {
 	// # Copy Assigment Operator #
 	Rect4T& operator=(const Rect4T &other) noexcept = default;
 
+	// # Return Rectangle Left Coordinate #
+	Type Left(void) const noexcept {
+		return Location.x;
+	}
+	
+	// # Return Rectangle Top Coordinate #
+	Type Top(void) const noexcept {
+		return Location.y;
+	}
+
+	// # Return Rectangle Right Coordinate #
+	Type Right(void) const noexcept {
+		return Location.x + Size.width;
+	}
+	
+	// # Return Rectangle Bottom Coordinate #
+	Type Bottom(void) const noexcept {
+		return Location.y + Size.height;
+	}
+
 	// # Returns Rectangle "Center-Point" Coordinates #
 	Vertex2T<Type> CenterPoint(void) const noexcept {
 		return Vertex2T<Type>(Size.width / 2 + Location.x, Size.height / 2 + Location.y);
 	}
-
-	// # Returns TRUE If This Rectangle Intersect with Other Rectangle #
+	
+	// # Returns TRUE If This Rectangle Intersect With Other Rectangle #
 	bool IntersectWith(const Rect4T &other) const noexcept {
 
+		// No Intersaction States
+		//           <3>
+		//       +---------+
+		//  <1>  |    T    |  <2>
+		//       +---------+
+		//           <4>
+
 		// # No Intersection Return FALSE #
-		if (other.Location.x + other.Size.width <= Location.x ||
-			other.Location.x >= Location.x + Size.width ||
-			other.Location.y + other.Size.height <= Location.y ||
-			other.Location.y >= Location.y + Size.height) {
+		if (other.Location.x + other.Size.width <= Location.x || // <1>
+			other.Location.x >= Location.x + Size.width || // <2>
+			other.Location.y + other.Size.height <= Location.y || // <3>
+			other.Location.y >= Location.y + Size.height) { // <4>
 			return false;
 		}
 
@@ -272,11 +309,18 @@ struct Rect4T {
 	// # Returns TRUE If Point is Inside Rectangle #
 	bool PointInRect(const Vertex2T<Type> &point) const noexcept {
 
+		// Point Outside Rectangle States
+		//           <3>
+		//       +---------+
+		//  <1>  |    T    |  <2>
+		//       +---------+
+		//           <4>
+
 		// # Point Outside Rectangle #
-		if (point.x <= Location.x ||
-			point.x >= Location.x + Size.width ||
-			point.y <= Location.y ||
-			point.y >= Location.y + Size.height) {
+		if (point.x <= Location.x || // <1>
+			point.x >= Location.x + Size.width || // <2>
+			point.y <= Location.y || // <3>
+			point.y >= Location.y + Size.height) { // <4 >
 			return false;
 		}
 
@@ -285,12 +329,14 @@ struct Rect4T {
 
 	}
 
-	// # Returns TRUE If This Rectangle is Equal with Other Rectangle #
+	// Returns TRUE:
+	// - If This Rectangle Is Equal With Other Rectangle
 	bool Equal(const Rect4T &other) const noexcept {
 		return Location == other.Location && Size == other.Size;
 	}
-
-	// # Returns TRUE If Rectangle Location and Size Is Zero #
+	
+	// Returns TRUE:
+	// - If Location And Size Is Zero
 	bool IsNull(void) const noexcept {
 		return Location.IsNull() && Size.IsNull();
 	}
@@ -307,10 +353,10 @@ struct Rect4T {
 	// Serializing
 
 	// Returns "Rect4T" Content in JSON Format
-	// "Rect4T": { "Vertex2T": { "x": {}, "y": {} }, "Size2T": { "width": {}, "height": {} } })";
+	// { "Location": { "x": {}, "y": {} }, "Size": { "width": {}, "height": {} } }
 	std::string ToString(void) const {
-		return R"("Rect4I": { )" + Location.ToString()
-			+ R"(, )" + Size.ToString() + R"( })";
+		return R"({ "Location": )" + Location.ToString()
+			+ R"(, "Size": )" + Size.ToString() + R"( })";
 	}
 
 	//----------------------------------------
