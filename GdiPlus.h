@@ -1,34 +1,33 @@
 #ifndef __GDI_PLUS_H__
 #define __GDI_PLUS_H__
 
-/***********************************************
-*                                              *
-* Copyright(c) [2022] Martins Andzans          *
-* Licensed Under [MIT License]                 *
-*                                              *
-* In MFC Application                           *
-* - This Header MUST be Included after <afx.h> *
-*       or other MFC Headers                   *
-*                                              *
-***********************************************/
+/*****************************************
+*                                        *
+* Copyright(c) [2022] Martins Andzans    *
+* Licensed Under [MIT License]           *
+*                                        *
+* - In MFC Application This Header       *
+* - - Must Be Included After MFC Headers *
+*                                        *
+*****************************************/
 
 #ifndef _WIN32
-#error "This SDK Works Only on Windows"
+#error "This Header Works Only For Windows Applications"
 #endif // !_WIN32
 
 //===== LIBRARYS =====//
 #pragma comment(lib, "msimg32.lib") // For GradientFill() Function
 //====================//
 
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif // !WIN32_LEAN_AND_MEAN
 
 //===== HEADERS ======//
 #ifndef __AFX_H__
-#include <tchar.h>
 #include <Windows.h>
 #endif // !__AFX_H__
 #include <array>
-#include <vector>
 #ifndef _STDINT
 #include <stdint.h>
 #endif // !__STDINT
@@ -199,8 +198,8 @@ struct GdiPlus {
 
 	}
 
-	static void _stdcall FillRectangle(_In_opt_ HDC hdc,
-		_In_ const Vertex2I &Location, _In_ const Size2I &Size, _In_ HBRUSH hBrush) noexcept {
+	static void _stdcall FillRectangle(_In_opt_ HDC hdc, _In_ const Vertex2I &Location,
+		_In_ const Size2I &Size, _In_ HBRUSH hBrush) noexcept {
 
 		if (hdc != NULL) {
 

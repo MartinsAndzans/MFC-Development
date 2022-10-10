@@ -8,10 +8,12 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include <memory>
 #include <vector>
 #include <string>
+#include <assert.h>
 
 #include "gdiplus.h"
 #include "Algorithms.h"
-#include "WindowsError.h"
+#include "SystemError.h"
+#include "SystemClipboard.h"
 
 #include "Resource.h"
 
@@ -228,7 +230,7 @@ public:
 		
 		// Create Window
 		if (!this->Create(NULL, _T("Flappy Bird"), Style, WindowRect)) {
-			throw std::runtime_error(WindowsError(GetLastError()).GetErrorMessage());
+			throw std::runtime_error(SystemError(GetLastError()).GetErrorMessage());
 		}
 
 		this->SetIcon(hWindowIcon, FALSE); // Small Icon
@@ -509,11 +511,18 @@ protected:
 			GdiPlus::DrawText(WindowDC, { 4, 4 }, { 200, 40 }, L"Flappy Bird", m_Font_SegoeUI, ColorU::Enum::Yellow);
 
 			// WinErr Error(0x0000212F);
-			WindowsError Error(0x00000020);
-			Error.Format("Error Codes <ErrorCode/> <ErrorCode/>\n<ErrorCode/> <ErrorCode/> - <ErrorMessage/>");
-			
+			// std::string FormatErrorMessage = SystemError(0x0000212F).Format("Error Code: $(ErrorCode) - $(ErrorMessage)");
+			// std::string JSON = SystemError(0xFFFFFFFF).ToString();
+
+			using namespace std::string_literals;
+
+			SystemClipboard::SetClipboardText(this->GetSafeHwnd(), "Text To Clipboard Num: "s + std::to_string(Frame));
+			assert(SystemClipboard::SetClipboardText(NULL, "Text To Clipboard") == SystemClipboard::InvalidParameter);
+			assert(SystemClipboard::SetClipboardText(this->GetSafeHwnd(), "") == SystemClipboard::InvalidParameter);
+			assert(SystemClipboard::SetClipboardText(NULL, "") == SystemClipboard::InvalidParameter);
+
 			// std::string JSON = GateColors[1].ToString();
-			GdiPlus::DrawText(WindowDC, { 4, 38 }, { 600, 40 }, Error.ToString(), m_Font_SegoeUI, ColorU::Enum::Yellow);
+			GdiPlus::DrawText(WindowDC, { 4, 38 }, { 600, 40 }, SystemError(0x0000212F).GetErrorMessage(), m_Font_SegoeUI, ColorU::Enum::Yellow);
 
 			MemoryDC.SelectObject(PrevBitmap);
 		

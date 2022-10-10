@@ -1,12 +1,12 @@
 #ifndef __IJTYPE_H__
 #define __IJTYPE_H__
 
-/*************************************************
-*                                                *
-* Copyright(c) 2022 Martins Andzans              *
-* Licensed Under MIT License                     *
-*                                                *
-*************************************************/
+/**************************************
+*                                     *
+* Copyright(c) [2022] Martins Andzans *
+* Licensed Under: [MIT License]       *
+*                                     *
+**************************************/
 
 //===== HEADERS ======//
 #include <string>
@@ -31,8 +31,8 @@
 //----------------------------------------
 // Virtual Methods
 //----------------------------------------
-// - "ToString" - ASCII Charecter Version = 0
-// - "ToWString" - Unicode "UTF-16" Charecter Version
+// - "ToStringA" - ASCII Charecter Version = 0
+// - "ToStringW" - Unicode "UTF-16" Charecter Version
 //----------------------------------------
 // Virtual Methods Return Value
 //----------------------------------------
@@ -46,10 +46,10 @@ interface IJType {
 	// This Methods Must Convert
 	// Derived Class Content In JSON Format
 	
-	// ASCII Charecter Version
+	// ASCII Character Version
 	virtual std::string ToStringA() const = 0;
 	
-	// Unicode "UTF-16" Charecter Version
+	// Unicode "UTF-16" Character Version
 	virtual std::wstring ToStringW() const {
 
 		std::string Format = ToStringA();
@@ -59,7 +59,7 @@ interface IJType {
 		WFormat.reserve(FormatLength);
 
 		for (const char &Character : Format) {
-			WFormat.push_back((wchar_t)(Character));
+			WFormat.push_back(static_cast<wchar_t>(Character));
 		}
 
 		return WFormat;

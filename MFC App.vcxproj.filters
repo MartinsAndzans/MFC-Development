@@ -39,8 +39,11 @@
     <Filter Include="Collections">
       <UniqueIdentifier>{0e9b4dd6-8874-4864-9787-0639ee952c09}</UniqueIdentifier>
     </Filter>
-    <Filter Include="WinError">
+    <Filter Include="SystemError">
       <UniqueIdentifier>{5b113cfa-8b88-41ef-946a-bb176fac3eee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SystemClipboard">
+      <UniqueIdentifier>{19854132-e25c-4e6c-83b0-d50656474aaf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -92,8 +95,11 @@
     <ClInclude Include="ByteArray.h">
       <Filter>Collections</Filter>
     </ClInclude>
-    <ClInclude Include="WindowsError.h">
-      <Filter>WinError</Filter>
+    <ClInclude Include="SystemError.h">
+      <Filter>SystemError</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemClipboard.h">
+      <Filter>SystemClipboard</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
