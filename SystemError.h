@@ -24,7 +24,6 @@
 #include <Windows.h>
 #endif // !__AFX_H__
 #include <string>
-#include <utility>
 #include <regex>
 #ifndef _STDINT
 #include <stdint.h>
@@ -124,18 +123,12 @@ public:
 	// - Formated String
 	std::string Format(const std::string &Template) const {
 
-		std::string Temp = Template;
+		std::string Formated = Template;
 
-		std::pair<std::regex, std::string> Tokens[] = {
-			{ std::regex(R"(\$\(ErrorCode\))"), std::to_string(m_ErrorCode) },
-			{ std::regex(R"(\$\(ErrorMessage\))"), m_ErrorMessage }
-		};
+		std::regex_replace(Formated, std::regex(R"(\$\(ErrorCode\))"), std::to_string(m_ErrorCode));
+		std::regex_replace(Formated, std::regex(R"(\$\(ErrorMessage\))"), m_ErrorMessage);
 
-		for (size_t i = 0; i < _countof(Tokens); i++) {
-			Temp = std::regex_replace(Temp, Tokens[i].first, Tokens[i].second);
-		}
-
-		return Temp;
+		return Formated;
 
 	}
 
