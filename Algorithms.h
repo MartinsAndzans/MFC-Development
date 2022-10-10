@@ -11,7 +11,9 @@
 *                                                *
 *************************************************/
 
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif // !WIN32_LEAN_AND_MEAN
 
 //===== HEADERS ======//
 #ifndef __AFX_H__
@@ -27,45 +29,34 @@
 #endif // !_STDINT
 //====================//
 
+#ifndef UNREFERENCED_PARAMETER
+#define UNREFERENCED_PARAMETER(P) (P)
+#endif // !UNREFERENCED_PARAMETER
+
 struct Algorithms {
 
 	// # This Function Reverse Number #
-	static constexpr uint32_t ReverseNumber(_In_ uint32_t Number) noexcept {
+	template<typename Type>
+	static constexpr Type ReverseNumber(_In_ const Type &Number) noexcept {
 
-		uint32_t ReversedNumber = 0;
-		
+		bool Negative = (Number < 0) ? true : false;
+
+		Type OriginalNumber = (Negative) ? -Number : Number;
+		Type ReversedNumber = 0;
+
 		/* Reverse Number */
-		while (Number != 0) {
+		while (OriginalNumber != 0) {
 
 			// # Add zero to "ReversedNumber" #
 			ReversedNumber *= 10;
-			// # Get last digit from "Number" and add to "ReversedNumber" #
-			ReversedNumber += Number % 10;
-			// # Remove last digit from "Number" #
-			Number /= 10;
+			// # Get last digit from "OriginalNumber" and add to "ReversedNumber" #
+			ReversedNumber += OriginalNumber % 10;
+			// # Remove last digit from "OriginalNumber" #
+			OriginalNumber /= 10;
 
 		}
 
-		return ReversedNumber;
-
-	}
-
-	// # This Function Sum all "Number" digits #
-	static constexpr uint32_t SumDigits(_In_ uint32_t Number) noexcept {
-
-		uint32_t Sum = 0;
-
-		/* Sum Digits */
-		while (Number != 0) {
-
-			// # Get last digit from "Number" and add to "Sum" #
-			Sum += Number % 10;
-			// # Remove last digit from "Number" #
-			Number /= 10;
-
-		}
-
-		return Sum;
+		return (Negative) ? -ReversedNumber : ReversedNumber;
 
 	}
 
@@ -144,7 +135,7 @@ struct Algorithms {
 	}
 
 	// # This Function Encrypt Text To ASCII Value Code #
-	static std::string EncryptText(_In_ std::string_view String) {
+	static std::string EncryptText(_In_ const std::string &String) {
 
 		std::string EncryptedString;
 
@@ -160,10 +151,10 @@ struct Algorithms {
 	}
 
 	// # This Function Decrypt Text From ASCII Value Code #
-	static std::string DecryptText(_In_ std::string_view EncryptedString) {
+	static std::string DecryptText(_In_ const std::string &EncryptedString) {
 
 		std::string DecryptedString;
-		std::istringstream sstream(EncryptedString.data());
+		std::istringstream sstream(EncryptedString);
 
 		while (!sstream.eof()) {
 
@@ -174,7 +165,10 @@ struct Algorithms {
 
 			try {
 				ascii_value = std::stoi(temp);
-			} catch (const std::exception &e) {
+			} catch (const std::invalid_argument &e) {
+				UNREFERENCED_PARAMETER(e);
+				return "";
+			} catch (const std::out_of_range &e) {
 				UNREFERENCED_PARAMETER(e);
 				return "";
 			}
@@ -189,237 +183,14 @@ struct Algorithms {
 
 	static std::wstring StringToWideString(const std::string &String) {
 
-		std::wstring WString;
-		WString.reserve(String.length() + 1);
+		std::wstring WideString;
+		WideString.reserve(String.length() + 1);
 
 		for (const char &Character : String) {
-			WString.push_back(static_cast<wchar_t>(Character));
+			WideString.push_back(static_cast<wchar_t>(Character));
 		}
 
-		return WString;
-
-	}
-
-	/// <param name="NewClipboardOwner">New Clipboard Owner Window Handle - Must Not Be NULL</param>
-	/// <param name="String">What Text Save To Clipboard</param>
-	/// <returns>
-	///	<para>If Succeded Returns 0</para>
-	///	<para>If Failed Returns WINAPI Error Code</para>
-	/// </returns>
-	static _Success_(return == 0) DWORD WINAPI SetClipboardText(_In_opt_ HWND NewClipboardOwner, _In_ const std::string &String) noexcept {
-
-		if (!OpenClipboard(NewClipboardOwner)) {
-			return GetLastError();
-		}
-
-		HGLOBAL hCopyData = NULL;
-
-		if (String.empty()) {
-
-			static constexpr char EmptyString[] = "<Empty String>";
-			
-			hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS,
-				(ARRAYSIZE(EmptyString) + 1) * sizeof(char));
-			
-			if (hCopyData == NULL) {
-				DWORD ErrorCode = GetLastError();
-				CloseClipboard();
-				return ErrorCode;
-			}
-
-			#pragma warning(disable:6387)
-			LPVOID lpCopyData = GlobalLock(hCopyData);
-			memcpy(lpCopyData, EmptyString, ARRAYSIZE(EmptyString) * sizeof(char));
-			GlobalUnlock(hCopyData);
-			#pragma warning(default:6387)
-
-		} else {
-
-			hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS,
-				(String.length() + 1) * sizeof(char));
-
-			if (hCopyData == NULL) {
-				DWORD ErrorCode = GetLastError();
-				CloseClipboard();
-				return ErrorCode;
-			}
-
-			#pragma warning(disable:6387)
-			LPVOID lpCopyData = GlobalLock(hCopyData);
-			memcpy(lpCopyData, String.c_str(), String.length() * sizeof(char));
-			GlobalUnlock(hCopyData);
-			#pragma warning(default:6387)
-
-		}
-
-		EmptyClipboard();
-		SetClipboardData(CF_TEXT, hCopyData);
-		CloseClipboard();
-
-		return 0;
-
-	}
-
-	/// <param name="NewClipboardOwner">New Clipboard Owner Window Handle - Must Not Be NULL</param>
-	/// <param name="UString">What UText Save To Clipboard</param>
-	/// <returns>
-	///	<para>If Succeded Returns 0</para>
-	///	<para>If Failed Returns WINAPI Error Code</para>
-	/// </returns>
-	static _Success_(return == 0) DWORD WINAPI SetClipboardText(_In_opt_ HWND NewClipboardOwner, _In_ const std::wstring &UString) noexcept {
-
-		if (!OpenClipboard(NewClipboardOwner)) {
-			return GetLastError();
-		}
-
-		HGLOBAL hCopyData = NULL;
-
-		if (UString.empty()) {
-
-			static constexpr wchar_t EmptyString[] = L"<Empty Unicode String>";
-
-			hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS,
-				(ARRAYSIZE(EmptyString) + 1) * sizeof(wchar_t));
-
-
-			if (hCopyData == NULL) {
-				DWORD ErrorCode = GetLastError();
-				CloseClipboard();
-				return ErrorCode;
-			}
-
-			#pragma warning(disable:6387)
-			LPVOID lpCopyData = GlobalLock(hCopyData);
-			memcpy(lpCopyData, EmptyString, ARRAYSIZE(EmptyString) * sizeof(wchar_t));
-			GlobalUnlock(hCopyData);
-			#pragma warning(default:6387)
-
-		} else {
-
-			hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS,
-				(UString.length() + 1) * sizeof(wchar_t));
-
-			if (hCopyData == NULL) {
-				DWORD ErrorCode = GetLastError();
-				CloseClipboard();
-				return ErrorCode;
-			}
-
-			#pragma warning(disable:6387)
-			LPVOID lpCopyData = GlobalLock(hCopyData);
-			memcpy(lpCopyData, UString.c_str(), UString.length() * sizeof(wchar_t));
-			GlobalUnlock(hCopyData);
-			#pragma warning(default:6387)
-
-		}
-
-		EmptyClipboard();
-		SetClipboardData(CF_UNICODETEXT, hCopyData);
-		CloseClipboard();
-
-		return 0;
-
-	}
-
-	/// <param name="NewClipboardOwner">New Clipboard Owner Window Handle - Must Not Be NULL</param>
-	/// <param name="StringBuffer">Where To Save Text From Clipboard</param>
-	/// <returns>
-	///	<para>If Succeded Returns 0</para>
-	///	<para>If Failed Returns WINAPI Error Code</para>
-	/// </returns>
-	static _Success_(return == 0) DWORD WINAPI GetClipboardText(_In_opt_ HWND NewClipboardOwner, _Out_ std::string &StringBuffer) {
-
-		// Open Clipboard For Reading
-		if (!OpenClipboard(NewClipboardOwner)) {
-			return GetLastError();
-		}
-
-		DWORD ErrorCode = 0;
-
-		if (!IsClipboardFormatAvailable(CF_TEXT)) {
-			ErrorCode = GetLastError();
-			StringBuffer = "";
-			CloseClipboard();
-			return ErrorCode;
-		}
-
-		// Try Get Clipboard Text
-		HGLOBAL hClipboardData = GetClipboardData(CF_TEXT);
-
-		// Clipboard Doesn't Contain Text
-		if (hClipboardData == NULL) {
-			ErrorCode = GetLastError();
-			StringBuffer = "";
-			CloseClipboard();
-			return ErrorCode;
-		}
-
-		LPCVOID lpClipboardData = GlobalLock(hClipboardData);
-
-		if (lpClipboardData == nullptr) {
-			ErrorCode = GetLastError();
-			StringBuffer = "";
-			CloseClipboard();
-			return ErrorCode;
-		}
-
-		StringBuffer = static_cast<const char*>(lpClipboardData);
-		GlobalUnlock(hClipboardData);
-
-		CloseClipboard();
-
-		return 0;
-
-	}
-
-	/// <param name="NewClipboardOwner">New Clipboard Owner Window Handle - Must Not Be NULL</param>
-	/// <param name="UStringBuffer">Where To Save UText From Clipboard</param>
-	/// <returns>
-	///	<para>If Succeded Returns 0</para>
-	///	<para>If Failed Returns WINAPI Error Code</para>
-	/// </returns>
-	static _Success_(return == 0) DWORD WINAPI GetClipboardText(_In_opt_ HWND NewClipboardOwner, _Out_ std::wstring &UStringBuffer) {
-
-		// Open Clipboard For Reading
-		if (!OpenClipboard(NewClipboardOwner)) {
-			return GetLastError();
-		}
-		
-		DWORD ErrorCode = 0;
-
-		if (!IsClipboardFormatAvailable(CF_UNICODETEXT)) {
-			ErrorCode = GetLastError();
-			UStringBuffer = L"";
-			CloseClipboard();
-			return ErrorCode;
-		}
-
-		// Try Get Clipboard UText
-		HGLOBAL hClipboardData = GetClipboardData(CF_UNICODETEXT);
-
-		// Clipboard Doesn't Contain UText
-		if (hClipboardData == NULL) {
-			ErrorCode = GetLastError();
-			UStringBuffer = L"";
-			CloseClipboard();
-			return ErrorCode;
-		}
-
-		LPCVOID lpClipboardData = GlobalLock(hClipboardData);
-
-		if (lpClipboardData == nullptr) {
-			ErrorCode = GetLastError();
-			UStringBuffer = L"";
-			CloseClipboard();
-			return ErrorCode;
-		}
-
-		UStringBuffer = static_cast<const wchar_t*>(lpClipboardData);
-		GlobalUnlock(hClipboardData);
-		
-		CloseClipboard();
-
-		return 0;
+		return WideString;
 
 	}
 
@@ -433,14 +204,22 @@ struct Algorithms {
 		//==========================================//
 
 		//========== GET LAST ERROR MESSAGE ==========//
-		DWORD Length = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM,
-			nullptr, dwLastError, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+
+		static constexpr DWORD dwFlags =
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS |
+			FORMAT_MESSAGE_MAX_WIDTH_MASK;
+
+		DWORD Length = FormatMessageA(dwFlags, nullptr, dwLastError,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			LastErrorMessage + 3, ARRAYSIZE(LastErrorMessage) - 4, nullptr);
+		
 		//============================================//
 		
 		if (Length == 0) {
 			return "Error Code: " + std::to_string(dwLastError) + " - Unknown Error";
 		} else {
+			LastErrorMessage[Length + 3 - 2] = '\0';
 			return "Error Code: " + std::to_string(dwLastError) + LastErrorMessage;
 		}
 
