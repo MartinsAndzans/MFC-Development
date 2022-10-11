@@ -24,6 +24,7 @@
 #include <Windows.h>
 #endif // !__AFX_H__
 #include <string>
+#include <memory>
 #include <regex>
 #ifndef _STDINT
 #include <stdint.h>
@@ -40,7 +41,7 @@ public:
 	//----------------------------------------
 	// Constructors
 
-	explicit SystemError(uint64_t ErrorCode) : m_ErrorCode(ErrorCode) {
+	explicit SystemError(uint32_t ErrorCode) : m_ErrorCode(ErrorCode) {
 
 		switch (ErrorCode) {
 		case ERROR_SUCCESS:
@@ -55,35 +56,35 @@ public:
 			//----------------------------------------
 			// Get System Error Message
 
-			static constexpr DWORD Flags =
+			static constexpr uint32_t Flags =
 				FORMAT_MESSAGE_FROM_SYSTEM |
 				FORMAT_MESSAGE_ALLOCATE_BUFFER |
 				FORMAT_MESSAGE_IGNORE_INSERTS |
 				FORMAT_MESSAGE_MAX_WIDTH_MASK;
 
 			#pragma warning(disable:6387)
-			DWORD Length = FormatMessageA(
-				Flags, nullptr, (DWORD)(ErrorCode),
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				(LPSTR)&lpErrorMessage, 0, nullptr);
+			uint32_t ErrorMessageLength = FormatMessageA(
+				Flags, nullptr, ErrorCode, LANG_USER_DEFAULT,
+				(LPSTR)(&lpErrorMessage), 0, nullptr);
 			#pragma warning(default:6387)
 
 			//----------------------------------------
-
-			if (Length != 0) {
+			
+			if (ErrorMessageLength != 0) {
 
 				try {
-					m_ErrorMessage = std::string(lpErrorMessage, Length - 1);
+					// # [ErrorMessageLength - 1] - Remove Ending " " #
+					m_ErrorMessage = std::string(lpErrorMessage, ErrorMessageLength - 1);
 					LocalFree(lpErrorMessage);
-				} catch (const std::exception &e) {
+				} catch (...) {
 					LocalFree(lpErrorMessage);
 					throw;
 				}
-
+			
 			} else {
 
 				m_ErrorMessage = "Unknown Error.";
-
+			
 			}
 
 			break;
@@ -103,7 +104,7 @@ public:
 	// Getters
 
 	// # Returns Error Code #
-	uint64_t GetErrorCode(void) const {
+	uint32_t GetErrorCode(void) const {
 		return m_ErrorCode;
 	}
 
@@ -125,8 +126,8 @@ public:
 
 		std::string Formated = Template;
 
-		std::regex_replace(Formated, std::regex(R"(\$\(ErrorCode\))"), std::to_string(m_ErrorCode));
-		std::regex_replace(Formated, std::regex(R"(\$\(ErrorMessage\))"), m_ErrorMessage);
+		Formated = std::regex_replace(Formated, std::regex(R"(\$\(ErrorCode\))"), std::to_string(m_ErrorCode));
+		Formated = std::regex_replace(Formated, std::regex(R"(\$\(ErrorMessage\))"), m_ErrorMessage);
 
 		return Formated;
 
@@ -153,8 +154,8 @@ public:
 	// Returns "SystemError" Content in JSON Format
 	// { "ErrorCode": {}, "ErrorMessage": "{}" }
 	std::string ToString(void) const {
-		return R"({ "ErrorCode": )" + std::to_string(m_ErrorCode)
-			+ R"(, "ErrorMessage": ")" + m_ErrorMessage + R"(" })";
+		return R"({ "ErrorCode": )" + std::to_string(m_ErrorCode) +
+			R"(, "ErrorMessage": ")" + m_ErrorMessage + R"(" })";
 	}
 
 	//----------------------------------------
@@ -164,7 +165,7 @@ public:
 
 private:
 
-	uint64_t m_ErrorCode;
+	uint32_t m_ErrorCode;
 	std::string m_ErrorMessage;
 
 };

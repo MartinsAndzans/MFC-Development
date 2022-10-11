@@ -1,15 +1,19 @@
 #ifndef __ALGORITHMS__
 #define __ALGORITHMS__
 
-/*************************************************
-*                                                *
-*         Copyright(c) Martins Andzans        '  *
-*                                                *
-* - In MFC Application                           *
-* - - This Header MUST be Included after <afx.h> *
-*       or other MFC Headers                     *
-*                                                *
-*************************************************/
+/*****************************************
+*                                        *
+* Copyright(c) [2022] Martins Andzans    *
+* Licensed Under: [MIT License]          *
+*                                        *
+* - In MFC Application This Header       *
+* - - Must Be Included After MFC Headers *
+*                                        *
+*****************************************/
+
+#ifndef _WIN32
+#error "This Header Works Only For Windows Applications"
+#endif // !_WIN32
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -17,13 +21,12 @@
 
 //===== HEADERS ======//
 #ifndef __AFX_H__
-#include <tchar.h>
 #include <Windows.h>
 #endif // !__AFX_H__
+#include <string>  
+#include <sstream>
 #include <memory>
 #include <fstream>
-#include <string>
-#include <sstream>
 #ifndef _STDINT
 #include <stdint.h>
 #endif // !_STDINT
@@ -165,11 +168,7 @@ struct Algorithms {
 
 			try {
 				ascii_value = std::stoi(temp);
-			} catch (const std::invalid_argument &e) {
-				UNREFERENCED_PARAMETER(e);
-				return "";
-			} catch (const std::out_of_range &e) {
-				UNREFERENCED_PARAMETER(e);
+			} catch (...) {
 				return "";
 			}
 			
@@ -196,31 +195,34 @@ struct Algorithms {
 
 
 	// # This Function Get WINAPI Error Message From System Resources #
-	static std::string GetWINAPIErrorMessage(_In_ DWORD dwLastError) {
+	static std::string GetWINAPIErrorMessage(_In_ uint32_t ErrorCode) {
 
-		//========== ERROR MESSAGE BUFFER ==========//
-		static constexpr size_t MAX_CHAR_STRING = 256U;
-		CHAR LastErrorMessage[MAX_CHAR_STRING] = { ' ', '-', ' ' };
-		//==========================================//
+		//----------------------------------------
+		// Error Message Bufffer
 
-		//========== GET LAST ERROR MESSAGE ==========//
+		static constexpr size_t MAX_CHAR_STRING = 410U;
+		CHAR ErrorMessageBuffer[MAX_CHAR_STRING] = { 0 };
+		
+		//----------------------------------------
 
-		static constexpr DWORD dwFlags =
+		//----------------------------------------
+		// Get System Error Message
+
+		static constexpr uint32_t Flags =
 			FORMAT_MESSAGE_FROM_SYSTEM |
 			FORMAT_MESSAGE_IGNORE_INSERTS |
 			FORMAT_MESSAGE_MAX_WIDTH_MASK;
 
-		DWORD Length = FormatMessageA(dwFlags, nullptr, dwLastError,
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			LastErrorMessage + 3, ARRAYSIZE(LastErrorMessage) - 4, nullptr);
+		DWORD ErrorMessageLength = FormatMessageA(
+			Flags, nullptr, ErrorCode, LANG_USER_DEFAULT,
+			ErrorMessageBuffer, ARRAYSIZE(ErrorMessageBuffer) - 1, nullptr);
 		
-		//============================================//
+		//----------------------------------------
 		
-		if (Length == 0) {
-			return "Error Code: " + std::to_string(dwLastError) + " - Unknown Error";
+		if (ErrorMessageLength == 0) {
+			return "Error Code: " + std::to_string(ErrorCode) + " - Unknown Error";
 		} else {
-			LastErrorMessage[Length + 3 - 2] = '\0';
-			return "Error Code: " + std::to_string(dwLastError) + LastErrorMessage;
+			return "Error Code: " + std::to_string(ErrorCode) + " - " + std::string(ErrorMessageBuffer, ErrorMessageLength - 1);
 		}
 
 	}
@@ -229,7 +231,7 @@ struct Algorithms {
 	/// <param name="Bitmap">Handle To Bitmap</param>
 	/// <param name="FilePath">File Path With ".bmp" Extension</param>
 	/// <param name="BitmapSize">Bitmap Size in Pixels</param>
-	static void SaveBitmapToFile(_In_ HBITMAP Bitmap, _In_z_ LPCTSTR FilePath, _In_ SIZE BitmapSize) {
+	static void SaveBitmapToFile(_In_ HBITMAP Bitmap, _In_ const std::string &FilePath, _In_ SIZE BitmapSize) {
 		
 		std::ofstream image;
 

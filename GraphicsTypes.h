@@ -4,7 +4,7 @@
 /**************************************
 *                                     *
 * Copyright(c) [2022] Martins Andzans *
-* Licensed Under [MIT License]        *
+* Licensed Under: [MIT License]       *
 *                                     *
 **************************************/
 
@@ -16,14 +16,9 @@
 //====================//
 
 #ifndef _INC_MATH
-#if defined(_M_IX86) && _M_IX86_FP < 2 && !defined(_M_FP_FAST)
-using float_t = long double;
-using double_t = long double;
-#elif !defined(_M_IX86) || _M_IX86_FP >= 2 || defined(_M_FP_FAST)
 using float_t = float;
 using double_t = double;
-#endif // defined(_M_IX86) && _M_IX86_FP < 2 && !defined(_M_FP_FAST)
-#endif // !_INC_MATH
+#endif // _INC_MATH
 
 // # Geometry Vertex2T <Type> #
 template<typename Type>
@@ -104,7 +99,7 @@ struct Vertex2T {
 	// { "x": {}, "y": {} }
 	std::string ToString(void) const {
 		return R"({ "x": )" + std::to_string(x) +
-			   R"(, "y": )" + std::to_string(y) + R"( })";
+			R"(, "y": )" + std::to_string(y) + R"( })";
 	}
 
 	//----------------------------------------
@@ -200,8 +195,8 @@ struct Size2T {
 	// Returns "Size2T" Content in JSON Format
 	// { "width": {}, "height": {} }
 	std::string ToString(void) const {
-		return R"({ "width": )" + std::to_string(width)
-			+ R"(, "height": )" + std::to_string(height) + R"( })";
+		return R"({ "width": )" + std::to_string(width) +
+			R"(, "height": )" + std::to_string(height) + R"( })";
 	}
 
 	//----------------------------------------

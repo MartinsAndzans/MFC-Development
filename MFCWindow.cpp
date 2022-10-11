@@ -390,7 +390,7 @@ protected:
 
 		}
 
-		if (m_Player.rcPlayer.Top() > m_CanvasSize.height || m_Player.rcPlayer.Bottom() < 0) {
+		if (!m_Player.rcPlayer.IntersectWith(Rect4I(0, 0, m_CanvasSize.width, m_CanvasSize.height))) {
 
 			this->KillTimer(0xFF);
 			m_Gates.clear();
@@ -420,7 +420,7 @@ protected:
 
 			for (size_t i = 0; i < m_Gates.size(); i++) {
 
-				if (m_Gates[i].rcTop.Location.x + m_Gates[i].rcTop.Size.width < -20) {
+				if (m_Gates[i].rcTop.Right() < -10) {
 
 					m_Gates.erase(m_Gates.begin() + i);
 					i -= 1;
@@ -512,7 +512,8 @@ protected:
 
 			// WinErr Error(0x0000212F);
 			// std::string FormatErrorMessage = SystemError(0x0000212F).Format("Error Code: $(ErrorCode) - $(ErrorMessage)");
-			// std::string JSON = SystemError(0xFFFFFFFF).ToString();
+			SystemError Error1(0x00000000);
+			SystemError Error2(0x0000212F);
 
 			using namespace std::string_literals;
 

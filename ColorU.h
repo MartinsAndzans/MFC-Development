@@ -225,9 +225,9 @@ public:
 	// Returns "ColorU" Content in JSON Format
 	// { "Red": {}, "Green": {}, "Blue": {} }
 	std::string ToString(void) const {
-		return R"({ "Red": )" + std::to_string(GetRValue(m_rgbColor)) + R"(, "Green": )"
-			+ std::to_string(GetGValue(m_rgbColor)) + R"(, "Blue": )"
-			+ std::to_string(GetBValue(m_rgbColor)) + R"( })";
+		return R"({ "Red": )" + std::to_string(GetRValue(m_rgbColor)) +
+			R"(, "Green": )" + std::to_string(GetGValue(m_rgbColor)) +
+			R"(, "Blue": )" + std::to_string(GetBValue(m_rgbColor)) + R"( })";
 	}
 
 	//----------------------------------------
