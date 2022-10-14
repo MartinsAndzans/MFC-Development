@@ -160,7 +160,6 @@
     <ClInclude Include="ByteArray.h" />
     <ClInclude Include="ColorU.h" />
     <ClInclude Include="GraphicsTypes.h" />
-    <ClInclude Include="IJType.h" />
     <ClInclude Include="GdiPlus.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="MFCApp.h" />

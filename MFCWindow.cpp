@@ -512,16 +512,20 @@ protected:
 
 			// WinErr Error(0x0000212F);
 			// std::string FormatErrorMessage = SystemError(0x0000212F).Format("Error Code: $(ErrorCode) - $(ErrorMessage)");
+			
 			SystemError Error1(0x00000000);
+			
 			SystemError Error2(0x0000212F);
+			std::string JsonError = Error1.ToString();
 
+			const std::string &Test = Error2.GetErrorMessage();
+			
 			using namespace std::string_literals;
 
 			SystemClipboard::SetClipboardText(this->GetSafeHwnd(), "Text To Clipboard Num: "s + std::to_string(Frame));
-			assert(SystemClipboard::SetClipboardText(NULL, "Text To Clipboard") == SystemClipboard::InvalidParameter);
-			assert(SystemClipboard::SetClipboardText(this->GetSafeHwnd(), "") == SystemClipboard::InvalidParameter);
-			assert(SystemClipboard::SetClipboardText(NULL, "") == SystemClipboard::InvalidParameter);
-
+			assert(SystemClipboard::SetClipboardText(NULL, "Text To Clipboard") == ERROR_INVALID_PARAMETER);
+			assert(SystemClipboard::SetClipboardText(NULL, "") == ERROR_INVALID_PARAMETER);
+			
 			// std::string JSON = GateColors[1].ToString();
 			GdiPlus::DrawText(WindowDC, { 4, 38 }, { 600, 40 }, SystemError(0x0000212F).GetErrorMessage(), m_Font_SegoeUI, ColorU::Enum::Yellow);
 

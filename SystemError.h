@@ -24,20 +24,22 @@
 #include <Windows.h>
 #endif // !__AFX_H__
 #include <string>
-#include <memory>
 #include <regex>
 #ifndef _STDINT
 #include <stdint.h>
 #endif // !_STDINT
 //====================//
 
+using lpstr_t = char*;
+using lpcstr_t = const char*;
+
 //----------------------------------------------------------------
 // Class "SystemError"
-// - This Class Represents Error Message For <WIN32-API> Error Code
+// - This Class Represents Error Message For System Error Code
 //----------------------------------------------------------------
 class SystemError {
 public:
-
+	
 	//----------------------------------------
 	// Constructors
 
@@ -48,10 +50,10 @@ public:
 
 			m_ErrorMessage = "The operation completed successfully.";
 			break;
-			
+
 		default:
 
-			LPSTR lpErrorMessage = nullptr;
+			lpstr_t lpErrorMessage = nullptr;
 
 			//----------------------------------------
 			// Get System Error Message
@@ -65,11 +67,11 @@ public:
 			#pragma warning(disable:6387)
 			uint32_t ErrorMessageLength = FormatMessageA(
 				Flags, nullptr, ErrorCode, LANG_USER_DEFAULT,
-				(LPSTR)(&lpErrorMessage), 0, nullptr);
+				(lpstr_t)(&lpErrorMessage), 0, nullptr);
 			#pragma warning(default:6387)
 
 			//----------------------------------------
-			
+
 			if (ErrorMessageLength != 0) {
 
 				try {
@@ -80,17 +82,17 @@ public:
 					LocalFree(lpErrorMessage);
 					throw;
 				}
-			
+
 			} else {
 
 				m_ErrorMessage = "Unknown Error.";
-			
+
 			}
 
 			break;
 
 		}
-		
+
 	}
 
 	//----------------------------------------
@@ -104,12 +106,12 @@ public:
 	// Getters
 
 	// # Returns Error Code #
-	uint32_t GetErrorCode(void) const {
+	const uint32_t& GetErrorCode(void) const noexcept {
 		return m_ErrorCode;
 	}
 
 	// # Returns Error Message #
-	std::string GetErrorMessage(void) const {
+	const std::string& GetErrorMessage(void) const noexcept {
 		return m_ErrorMessage;
 	}
 

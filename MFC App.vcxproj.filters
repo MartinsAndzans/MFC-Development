@@ -21,29 +21,29 @@
     <Filter Include="Resource Files\Icon">
       <UniqueIdentifier>{34311165-2324-48d0-919f-2bf325c501ab}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GdiPlus">
-      <UniqueIdentifier>{b3ce8bc1-1515-44d8-b1c5-74f261f81c14}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Log">
       <UniqueIdentifier>{50a27fd2-2a7b-4b74-b3f3-4403d52f829b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Alghorithms">
-      <UniqueIdentifier>{adedcd5d-8298-449d-9dcf-60906944e45c}</UniqueIdentifier>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{2a17e412-6f9f-4e70-9606-6ccbab2814b5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IJType">
-      <UniqueIdentifier>{765509c2-325c-4c63-97f0-412d42fc329c}</UniqueIdentifier>
+    <Filter Include="Headers\SystemClipboard">
+      <UniqueIdentifier>{19854132-e25c-4e6c-83b0-d50656474aaf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Graphics">
+    <Filter Include="Headers\Graphics">
       <UniqueIdentifier>{fa0622d1-5a62-4119-98df-a6bd69953d8c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Collections">
-      <UniqueIdentifier>{0e9b4dd6-8874-4864-9787-0639ee952c09}</UniqueIdentifier>
+    <Filter Include="Headers\GdiPlus">
+      <UniqueIdentifier>{b3ce8bc1-1515-44d8-b1c5-74f261f81c14}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SystemError">
+    <Filter Include="Headers\SystemError">
       <UniqueIdentifier>{5b113cfa-8b88-41ef-946a-bb176fac3eee}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SystemClipboard">
-      <UniqueIdentifier>{19854132-e25c-4e6c-83b0-d50656474aaf}</UniqueIdentifier>
+    <Filter Include="Headers\Alghorithms">
+      <UniqueIdentifier>{adedcd5d-8298-449d-9dcf-60906944e45c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Collections">
+      <UniqueIdentifier>{0e9b4dd6-8874-4864-9787-0639ee952c09}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -75,31 +75,28 @@
       <Filter>MFC App</Filter>
     </ClInclude>
     <ClInclude Include="GdiPlus.h">
-      <Filter>GdiPlus</Filter>
+      <Filter>Headers\GdiPlus</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms.h">
-      <Filter>Alghorithms</Filter>
+      <Filter>Headers\Alghorithms</Filter>
     </ClInclude>
     <ClInclude Include="Log.h">
       <Filter>Log</Filter>
     </ClInclude>
-    <ClInclude Include="IJType.h">
-      <Filter>IJType</Filter>
-    </ClInclude>
     <ClInclude Include="GraphicsTypes.h">
-      <Filter>Graphics</Filter>
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="ColorU.h">
-      <Filter>Graphics</Filter>
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="ByteArray.h">
-      <Filter>Collections</Filter>
+      <Filter>Headers\Collections</Filter>
     </ClInclude>
     <ClInclude Include="SystemError.h">
-      <Filter>SystemError</Filter>
+      <Filter>Headers\SystemError</Filter>
     </ClInclude>
     <ClInclude Include="SystemClipboard.h">
-      <Filter>SystemClipboard</Filter>
+      <Filter>Headers\SystemClipboard</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

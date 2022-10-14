@@ -28,32 +28,25 @@
 
 struct SystemClipboard {
 
-	enum ErrorCode : int32_t {
-		Success = ERROR_SUCCESS,
-		InvalidParameter = ERROR_INVALID_PARAMETER,
-		OpenedByAnotherProcess = ERROR_CLIPBOARD_NOT_OPEN,
-		OutOfMemory = ERROR_OUTOFMEMORY
-	};
-
 	/// <summary>
 	/// This Function Copy Text To System Clipboard
 	/// </summary>
 	/// <param name="hWnd">New Clipboard Owner - Must Be Valid Window Handle</param>
 	/// <param name="ANSIText">Text To System Clipboard - Must NOT Be Empty String</param>
 	/// <returns>
-	/// <para>IF "hWnd" Is NOT Valid Window Handle OR "ANSIText" Is Empty String - [InvalidParameter]</para>
-	/// <para>IF Clipboard Has Been Opened By Another Process - [OpenedByAnotherProcess]</para>
-	/// <para>IF Not Enough Memory To Copy Text To System Clipboard - [OutOfMemory]</para>
-	/// <para>IF Text Has Been Copied To Clipboard - [Success]</para>
+	/// <para>IF "hWnd" Is NOT Valid Window Handle OR "ANSIText" Is Empty String - [ERROR_INVALID_PARAMETER]</para>
+	/// <para>IF Clipboard Has Been Opened By Another Process - [ERROR_CLIPBOARD_NOT_OPEN]</para>
+	/// <para>IF Not Enough Memory To Copy Text To System Clipboard - [ERROR_OUTOFMEMORY]</para>
+	/// <para>IF Text Has Been Copied To Clipboard - [ERROR_SUCCESS]</para>
 	/// </returns>
-	static ErrorCode _stdcall SetClipboardText(_In_opt_ HWND hWnd, _In_opt_ const std::string &ANSIText) {
+	static uint32_t _stdcall SetClipboardText(_In_opt_ HWND hWnd, _In_opt_ const std::string &ANSIText) {
 		
 		if (!IsWindow(hWnd) || ANSIText.empty()) {
-			return InvalidParameter;
+			return ERROR_INVALID_PARAMETER;
 		}
 
 		if (!OpenClipboard(hWnd)) {
-   			return OpenedByAnotherProcess;
+   			return ERROR_CLIPBOARD_NOT_OPEN;
 		}
 
 		HGLOBAL hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS,
@@ -61,7 +54,7 @@ struct SystemClipboard {
 
 		if (hCopyData == NULL) {
 			CloseClipboard();
-			return OutOfMemory;
+			return ERROR_OUTOFMEMORY;
 		}
 
 		#pragma warning(disable:6387)
@@ -74,7 +67,7 @@ struct SystemClipboard {
 		SetClipboardData(CF_TEXT, hCopyData);
 		CloseClipboard();
 
-		return Success;
+		return ERROR_SUCCESS;
 
 	}
 
@@ -89,14 +82,14 @@ struct SystemClipboard {
 	/// <para>IF Not Enough Memory To Copy Text To System Clipboard - [OutOfMemory]</para>
 	/// <para>IF Text Has Been Copied To Clipboard - [Success]</para>
 	/// </returns>
-	static ErrorCode _stdcall SetClipboardText(_In_opt_ HWND hWnd, _In_opt_ const std::wstring &UnicodeText) {
+	static uint32_t _stdcall SetClipboardText(_In_opt_ HWND hWnd, _In_opt_ const std::wstring &UnicodeText) {
 
 		if (!IsWindow(hWnd) || UnicodeText.empty()) {
-			return InvalidParameter;
+			return ERROR_INVALID_PARAMETER;
 		}
 
 		if (!OpenClipboard(hWnd)) {
-			return OpenedByAnotherProcess;
+			return ERROR_CLIPBOARD_NOT_OPEN;
 		}
 
 		HGLOBAL hCopyData = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT | GMEM_VALID_FLAGS,
@@ -104,7 +97,7 @@ struct SystemClipboard {
 
 		if (hCopyData == NULL) {
 			CloseClipboard();
-			return OutOfMemory;
+			return ERROR_OUTOFMEMORY;
 		}
 
 		#pragma warning(disable:6387)
@@ -117,18 +110,18 @@ struct SystemClipboard {
 		SetClipboardData(CF_UNICODETEXT, hCopyData);
 		CloseClipboard();
 
-		return Success;
+		return ERROR_SUCCESS;
 
 	}
 
-	static ErrorCode _stdcall GetClipboardText(_In_opt_ HWND hWnd, _Pre_maybenull_ std::string &ANSITextBuffer) {
+	static uint32_t _stdcall GetClipboardText(_In_opt_ HWND hWnd, _Inout_ std::string &ANSITextBuffer) {
 
 		if (!IsWindow(hWnd)) {
-			return InvalidParameter;
+			return ERROR_INVALID_PARAMETER;
 		}
 
 		if (!OpenClipboard(hWnd)) {
-			return OpenedByAnotherProcess;
+			return ERROR_CLIPBOARD_NOT_OPEN;
 		}
 
 		HGLOBAL hClipboardData = GetClipboardData(CF_TEXT);
@@ -139,7 +132,7 @@ struct SystemClipboard {
 
 			if (lpClipboardData != nullptr) {
 
-				ANSITextBuffer = lpClipboardData;
+				ANSITextBuffer += lpClipboardData;
 				GlobalUnlock(hClipboardData);
 
 			}
@@ -148,18 +141,18 @@ struct SystemClipboard {
 
 		CloseClipboard();
 
-		return Success;
+		return ERROR_SUCCESS;
 
 	}
 
-	static ErrorCode _stdcall GetClipboardText(_In_opt_ HWND hWnd, _Pre_maybenull_ std::wstring &UnicodeTextBuffer) {
+	static uint32_t _stdcall GetClipboardText(_In_opt_ HWND hWnd, _Inout_ std::wstring &UnicodeTextBuffer) {
 
 		if (!IsWindow(hWnd)) {
-			return InvalidParameter;
+			return ERROR_INVALID_PARAMETER;
 		}
 
 		if (!OpenClipboard(hWnd)) {
-			return OpenedByAnotherProcess;
+			return ERROR_CLIPBOARD_NOT_OPEN;
 		}
 
 		HGLOBAL hClipboardData = GetClipboardData(CF_UNICODETEXT);
@@ -170,7 +163,7 @@ struct SystemClipboard {
 
 			if (lpClipboardData != nullptr) {
 
-				UnicodeTextBuffer = lpClipboardData;
+				UnicodeTextBuffer += lpClipboardData;
 				GlobalUnlock(hClipboardData);
 
 			}
@@ -179,7 +172,7 @@ struct SystemClipboard {
 
 		CloseClipboard();
 
-		return Success;
+		return ERROR_SUCCESS;
 
 	}
 

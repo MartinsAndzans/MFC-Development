@@ -158,15 +158,9 @@ struct Size2T {
 	}
 
 	// # Scales This Object Size By Given Factor >= 1 #
-	void Scale(int16_t wFactor, int16_t hFactor) noexcept {
+	void Scale(Type wFactor, Type hFactor) noexcept {
 		width = (wFactor > 1) ? width * wFactor : width;
 		height = (hFactor > 1) ? height * hFactor : height;
-	}
-
-	// # Scales This Object Size By Given Factor >= 1 #
-	void Scale(float_t wFactor, float_t hFactor) noexcept {
-		width = (wFactor > 1.0F) ? static_cast<Type>(width * wFactor) : width;
-		height = (hFactor > 1.0F) ? static_cast<Type>(height * hFactor) : height;
 	}
 
 	// Returns TRUE:
