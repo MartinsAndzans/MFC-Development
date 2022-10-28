@@ -12,38 +12,35 @@
     <Filter Include="MFC App">
       <UniqueIdentifier>{7bd06350-bd02-4e1c-a012-5c510e053d06}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Main Window">
-      <UniqueIdentifier>{62b5bfdb-b1d3-4e9d-b440-c36b73041333}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\Include">
       <UniqueIdentifier>{01f4d552-0491-4288-870d-b421560b4602}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files\Icon">
       <UniqueIdentifier>{34311165-2324-48d0-919f-2bf325c501ab}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Log">
-      <UniqueIdentifier>{50a27fd2-2a7b-4b74-b3f3-4403d52f829b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Headers">
       <UniqueIdentifier>{2a17e412-6f9f-4e70-9606-6ccbab2814b5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\SystemClipboard">
-      <UniqueIdentifier>{19854132-e25c-4e6c-83b0-d50656474aaf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\Graphics">
-      <UniqueIdentifier>{fa0622d1-5a62-4119-98df-a6bd69953d8c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\GdiPlus">
-      <UniqueIdentifier>{b3ce8bc1-1515-44d8-b1c5-74f261f81c14}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\SystemError">
-      <UniqueIdentifier>{5b113cfa-8b88-41ef-946a-bb176fac3eee}</UniqueIdentifier>
     </Filter>
     <Filter Include="Headers\Alghorithms">
       <UniqueIdentifier>{adedcd5d-8298-449d-9dcf-60906944e45c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\Collections">
-      <UniqueIdentifier>{0e9b4dd6-8874-4864-9787-0639ee952c09}</UniqueIdentifier>
+    <Filter Include="Headers\Windows">
+      <UniqueIdentifier>{3b62336c-8e30-47f8-ae80-71c708cf04a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Windows\GdiPlus">
+      <UniqueIdentifier>{b3ce8bc1-1515-44d8-b1c5-74f261f81c14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Windows\Types">
+      <UniqueIdentifier>{1576f9de-37a5-4d34-bd74-fb6d7d8783a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Windows\Graphics">
+      <UniqueIdentifier>{85c1649a-f428-4a91-a4be-1b48dd314d87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Windows\Graphics\TStatic">
+      <UniqueIdentifier>{eab8dbf5-2066-4cf5-ae97-d9723f3894c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Windows\Graphics\TButton">
+      <UniqueIdentifier>{2672532b-fb4f-480c-8835-115a7cfb13df}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -75,28 +72,22 @@
       <Filter>MFC App</Filter>
     </ClInclude>
     <ClInclude Include="GdiPlus.h">
-      <Filter>Headers\GdiPlus</Filter>
+      <Filter>Headers\Windows\GdiPlus</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms.h">
       <Filter>Headers\Alghorithms</Filter>
     </ClInclude>
-    <ClInclude Include="Log.h">
-      <Filter>Log</Filter>
+    <ClInclude Include="Windows\Types\ColorU.h">
+      <Filter>Headers\Windows\Types</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsTypes.h">
-      <Filter>Headers\Graphics</Filter>
+    <ClInclude Include="Windows\Types\GraphicsTypes.h">
+      <Filter>Headers\Windows\Types</Filter>
     </ClInclude>
-    <ClInclude Include="ColorU.h">
-      <Filter>Headers\Graphics</Filter>
+    <ClInclude Include="Windows\SystemClipboard.h">
+      <Filter>Headers\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="ByteArray.h">
-      <Filter>Headers\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemError.h">
-      <Filter>Headers\SystemError</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemClipboard.h">
-      <Filter>Headers\SystemClipboard</Filter>
+    <ClInclude Include="Windows\SystemError.h">
+      <Filter>Headers\Windows</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

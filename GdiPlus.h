@@ -31,8 +31,8 @@
 #ifndef _STDINT
 #include <stdint.h>
 #endif // !__STDINT
-#include "GraphicsTypes.h"
-#include "ColorU.h"
+#include "Windows/Types/GraphicsTypes.h"
+#include "Windows/Types/ColorU.h"
 //====================//
 
 // # Image Load Properties #
@@ -46,7 +46,7 @@ enum class LoadMode : UINT16 {
 struct GdiPlus {
 
 	static void _stdcall DrawLine(_In_opt_ HDC hdc, _In_ const Vertex2I &lineBegin, _In_ const Vertex2I &lineEnd,
-		_In_ const ColorU &strokeColor = ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) {
+		_In_ const Windows::ColorU &strokeColor = Windows::ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) {
 
 		if (hdc != NULL) {
 
@@ -64,7 +64,7 @@ struct GdiPlus {
 	}
 
 	static void _stdcall DrawRectangle(_In_opt_ HDC hdc, _In_ const Vertex2I &Location, _In_ const Size2I &Size,
-		_In_ const ColorU &strokeColor = ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
+		_In_ const Windows::ColorU &strokeColor = Windows::ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
 
 		if (hdc != NULL) {
 
@@ -95,7 +95,7 @@ struct GdiPlus {
 	}
 
 	static void _stdcall DrawEllipse(_In_opt_ HDC hdc, _In_ const Vertex2I &CenterPoint, _In_ UINT32 RadiusX, _In_ UINT32 RadiusY,
-		_In_ const ColorU &strokeColor = ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
+		_In_ const Windows::ColorU &strokeColor = Windows::ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
 
 		if (hdc != NULL) {
 
@@ -113,7 +113,7 @@ struct GdiPlus {
 	}
 
 	static void _stdcall DrawTriangle(_In_opt_ HDC hdc, _In_ const std::array<Vertex2I, 3> &Triangle,
-		_In_ const ColorU &strokeColor = ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
+		_In_ const Windows::ColorU &strokeColor = Windows::ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
 
 		if (hdc != NULL) {
 
@@ -143,7 +143,7 @@ struct GdiPlus {
 
 	template<size_t ArraySize>
 	static void _stdcall DrawGeometry(_In_opt_ HDC hdc, _In_ const std::array<Vertex2I, ArraySize> &VertexBuffer,
-		_In_ const ColorU &strokeColor = ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
+		_In_ const Windows::ColorU &strokeColor = Windows::ColorU::Enum::DarkBlue, _In_ UINT32 strokeWidth = 1U) noexcept {
 		
 		static_assert(ArraySize >= 1, "At Least ONE Vertice is Required");
 
@@ -306,7 +306,7 @@ struct GdiPlus {
 	#undef DrawText
 
 	static void _stdcall DrawText(_In_ HDC hdc, _In_ const Vertex2I &Location, _In_ const Size2I &Size,
-		_In_ const std::string &String, _In_ HFONT TextFont, _In_ const ColorU &TextColor = ColorU::Enum::DarkBlue) {
+		_In_ const std::string &String, _In_ HFONT TextFont, _In_ const Windows::ColorU &TextColor = Windows::ColorU::Enum::DarkBlue) {
 
 		COLORREF PrevColor = SetTextColor(hdc, TextColor);
 		HGDIOBJ PrevFont = SelectObject(hdc, TextFont);
@@ -327,7 +327,7 @@ struct GdiPlus {
 	}
 
 	static void _stdcall DrawText(_In_ HDC hdc, _In_ const Vertex2I &Location, _In_ const Size2I &Size,
-		_In_ const std::wstring &String, _In_ HFONT TextFont, _In_ const ColorU &TextColor = ColorU::Enum::DarkBlue) {
+		_In_ const std::wstring &String, _In_ HFONT TextFont, _In_ const Windows::ColorU &TextColor = Windows::ColorU::Enum::DarkBlue) {
 
 		COLORREF PrevColor = SetTextColor(hdc, TextColor);
 		HGDIOBJ PrevFont = SelectObject(hdc, TextFont);
@@ -407,7 +407,7 @@ struct GdiPlus {
 
 	template<size_t ArraySize>
 	static void WINAPI FillGradientH(HDC hdc, const Vertex2I &Location, const Size2I &Size,
-		const std::array<ColorU, ArraySize> &ColorCollection) noexcept {
+		const std::array<Windows::ColorU, ArraySize> &ColorCollection) noexcept {
 
 		static_assert(ArraySize >= 2, "At Least TWO Colors is Required");
 
@@ -433,17 +433,17 @@ struct GdiPlus {
 				
 				{
 					GradientBeginX, 0,                                       // X, Y
-					ColorCollection[i].GetXValue(ColorU::Component::R) << 8, // Red
-					ColorCollection[i].GetXValue(ColorU::Component::G) << 8, // Green
-					ColorCollection[i].GetXValue(ColorU::Component::B) << 8, // Blue
+					ColorCollection[i].GetXValue(Windows::ColorU::Component::R) << 8, // Red
+					ColorCollection[i].GetXValue(Windows::ColorU::Component::G) << 8, // Green
+					ColorCollection[i].GetXValue(Windows::ColorU::Component::B) << 8, // Blue
 					0x0000                                                   // Alpha
 				},
 
 				{
 					GradientEndX, Size.height,                                   // X, Y
-					ColorCollection[i + 1].GetXValue(ColorU::Component::R) << 8, // Red
-					ColorCollection[i + 1].GetXValue(ColorU::Component::G) << 8, // Green
-					ColorCollection[i + 1].GetXValue(ColorU::Component::B) << 8, // Blue
+					ColorCollection[i + 1].GetXValue(Windows::ColorU::Component::R) << 8, // Red
+					ColorCollection[i + 1].GetXValue(Windows::ColorU::Component::G) << 8, // Green
+					ColorCollection[i + 1].GetXValue(Windows::ColorU::Component::B) << 8, // Blue
 					0x0000                                                       // Alpha
 				}
 
@@ -473,7 +473,7 @@ struct GdiPlus {
 
 	template<size_t ArraySize>
 	static void WINAPI FillGradientV(HDC hdc, const Vertex2I &Location, const Size2I &Size,
-		const std::array<ColorU, ArraySize> &ColorCollection) {
+		const std::array<Windows::ColorU, ArraySize> &ColorCollection) {
 
 		static_assert(ArraySize >= 2, "At Least TWO Colors is Required");
 
@@ -499,17 +499,17 @@ struct GdiPlus {
 
 				{
 					0, GradientBeginY,                                       // X, Y
-					ColorCollection[i].GetXValue(ColorU::Component::R) << 8, // Red
-					ColorCollection[i].GetXValue(ColorU::Component::G) << 8, // Green
-					ColorCollection[i].GetXValue(ColorU::Component::B) << 8, // Blue
+					ColorCollection[i].GetXValue(Windows::ColorU::Component::R) << 8, // Red
+					ColorCollection[i].GetXValue(Windows::ColorU::Component::G) << 8, // Green
+					ColorCollection[i].GetXValue(Windows::ColorU::Component::B) << 8, // Blue
 					0x0000                                                   // Alpha
 				},
 
 				{
 					Size.width, GradientEndY,                                    // X, Y
-					ColorCollection[i + 1].GetXValue(ColorU::Component::R) << 8, // Red
-					ColorCollection[i + 1].GetXValue(ColorU::Component::G) << 8, // Green
-					ColorCollection[i + 1].GetXValue(ColorU::Component::B) << 8, // Blue
+					ColorCollection[i + 1].GetXValue(Windows::ColorU::Component::R) << 8, // Red
+					ColorCollection[i + 1].GetXValue(Windows::ColorU::Component::G) << 8, // Green
+					ColorCollection[i + 1].GetXValue(Windows::ColorU::Component::B) << 8, // Blue
 					0x0000                                                       // Alpha
 				}
 

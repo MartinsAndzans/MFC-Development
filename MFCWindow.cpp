@@ -12,8 +12,8 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include "gdiplus.h"
 #include "Algorithms.h"
-#include "SystemError.h"
-#include "SystemClipboard.h"
+#include "Windows/SystemError.h"
+#include "Windows/SystemClipboard.h"
 
 #include "Resource.h"
 
@@ -230,7 +230,7 @@ public:
 		
 		// Create Window
 		if (!this->Create(NULL, _T("Flappy Bird"), Style, WindowRect)) {
-			throw std::runtime_error(SystemError(GetLastError()).GetErrorMessage());
+			throw std::runtime_error(Windows::SystemError(GetLastError()).GetErrorMessage());
 		}
 
 		this->SetIcon(hWindowIcon, FALSE); // Small Icon
@@ -268,7 +268,7 @@ protected:
 			return -1;
 		}
 
-		return 0;
+		return EXIT_SUCCESS;
 
 	}
 
@@ -294,7 +294,7 @@ protected:
 
 				INT PrevBKMode = ItemDC.SetBkMode(TRANSPARENT);
 				HGDIOBJ PrevFont = ItemDC.SelectObject(m_Font_SegoeUI);
-				COLORREF PrevColor = ItemDC.SetTextColor(ColorU::Enum::Yellow);
+				COLORREF PrevColor = ItemDC.SetTextColor(Windows::ColorU(Windows::ColorU::Enum::Yellow));
 
 				CSize TextSize;
 				GetTextExtentPoint32(ItemDC, StaticText, StaticText.GetLength(), &TextSize);
@@ -477,22 +477,23 @@ protected:
 			HGDIOBJ PrevBitmap = MemoryDC.SelectObject(Bitmap);
 
 			// Clear Screen
-			CBrush SkyBlueBrush(ColorU::Enum::LightBlue);
+			Windows::ColorU LightBlueColor(Windows::ColorU::Enum::LightBlue);
+			CBrush SkyBlueBrush(LightBlueColor);
 			GdiPlus::FillRectangle(MemoryDC, Vertex2I(), m_CanvasSize, SkyBlueBrush);
 			
-			std::array<ColorU, 3> PlayerColors = {
-				ColorU::Enum::Yellow,
-				ColorU::Enum::LightYellow,
-				ColorU::Enum::Yellow
+			std::array<Windows::ColorU, 3> PlayerColors = {
+				Windows::ColorU::Enum::Yellow,
+				Windows::ColorU::Enum::LightYellow,
+				Windows::ColorU::Enum::Yellow
 			};
 
 			// Draw Player
 			GdiPlus::FillGradientH(MemoryDC, m_Player.rcPlayer.Location, m_Player.rcPlayer.Size, PlayerColors);
 
-			std::array<ColorU, 3> GateColors = {
-				ColorU::Enum::DarkGreen,
-				ColorU::Enum::Green,
-				ColorU::Enum::DarkGreen
+			std::array<Windows::ColorU, 3> GateColors = {
+				Windows::ColorU::Enum::DarkGreen,
+				Windows::ColorU::Enum::Green,
+				Windows::ColorU::Enum::DarkGreen
 			};
 
 			// Draw Gates
@@ -508,26 +509,28 @@ protected:
 			WindowDC.StretchBlt(Client.Left(), Client.Top(), Client.Size.width, Client.Size.height,
 				&MemoryDC, 0, 0, m_CanvasSize.width, m_CanvasSize.height, SRCCOPY);
 
-			GdiPlus::DrawText(WindowDC, { 4, 4 }, { 200, 40 }, L"Flappy Bird", m_Font_SegoeUI, ColorU::Enum::Yellow);
+			GdiPlus::DrawText(WindowDC, { 4, 4 }, { 200, 40 }, L"Flappy Bird", m_Font_SegoeUI, Windows::ColorU::Enum::Yellow);
 
 			// WinErr Error(0x0000212F);
 			// std::string FormatErrorMessage = SystemError(0x0000212F).Format("Error Code: $(ErrorCode) - $(ErrorMessage)");
 			
-			SystemError Error1(0x00000000);
-			
-			SystemError Error2(0x0000212F);
-			std::string JsonError = Error1.ToString();
+			Windows::SystemError Error21(0x15);
 
-			const std::string &Test = Error2.GetErrorMessage();
+			Windows::SystemError ErrorSuccess(0x00); // Error Success
+			Windows::SystemError ErrorInvalidHandle(0x06); // Error Invalid Handle
 			
-			using namespace std::string_literals;
+			std::string JsonError = ErrorSuccess.ToString();
+			std::string ErrorMessage = ErrorSuccess.GetErrorMessage();
 
-			SystemClipboard::SetClipboardText(this->GetSafeHwnd(), "Text To Clipboard Num: "s + std::to_string(Frame));
-			assert(SystemClipboard::SetClipboardText(NULL, "Text To Clipboard") == ERROR_INVALID_PARAMETER);
-			assert(SystemClipboard::SetClipboardText(NULL, "") == ERROR_INVALID_PARAMETER);
+			const uint32_t &Code = ErrorInvalidHandle.GetErrorCode();
+			const std::string &Message = ErrorInvalidHandle.GetErrorMessage();
+			
+			Windows::SystemError Error;
+
+			Windows::SystemClipboard::ErrorCode u32ErrorCode = Windows::SystemClipboard::SetClipboardText(m_hWnd, _T("Text To Clipboard"));
 			
 			// std::string JSON = GateColors[1].ToString();
-			GdiPlus::DrawText(WindowDC, { 4, 38 }, { 600, 40 }, SystemError(0x0000212F).GetErrorMessage(), m_Font_SegoeUI, ColorU::Enum::Yellow);
+			GdiPlus::DrawText(WindowDC, { 4, 38 }, { 600, 40 }, Windows::SystemError(0x212F).Format("Error Code: $(ErrorCode) - $(ErrorMessage)"), m_Font_SegoeUI, Windows::ColorU::Enum::Yellow);
 
 			MemoryDC.SelectObject(PrevBitmap);
 		

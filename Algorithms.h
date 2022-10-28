@@ -36,11 +36,11 @@
 #define UNREFERENCED_PARAMETER(P) (P)
 #endif // !UNREFERENCED_PARAMETER
 
-struct Algorithms {
+namespace Algorithms {
 
 	// # This Function Reverse Number #
 	template<typename Type>
-	static constexpr Type ReverseNumber(_In_ const Type &Number) noexcept {
+	constexpr Type ReverseNumber(_In_ const Type &Number) noexcept {
 
 		bool Negative = (Number < 0) ? true : false;
 
@@ -69,7 +69,7 @@ struct Algorithms {
 	/// <param name="StringLength">String Length</param>
 	/// <returns><para>If Character has been Found Function Returns Character Index</para>
 	/// <para>If Character has not been Found Function Returns MAXSIZE_T Value</para></returns>
-	static size_t FindChar(_In_count_(StringLength) const char *lpString, _In_ char Characater, _In_ size_t StringLength) noexcept {
+	size_t FindChar(_In_count_(StringLength) const char *lpString, _In_ char Characater, _In_ size_t StringLength) noexcept {
 
 		for (size_t i = 0; i < StringLength; i++) {
 			if (lpString[i] == Characater) {
@@ -87,7 +87,7 @@ struct Algorithms {
 	/// <param name="StringLength">String Length</param>
 	/// <returns><para>If Character has been Found Function Returns Character Index</para>
 	/// <para>If Character has not been Found Function Returns MAXSIZE_T Value</para></returns>
-	static size_t FindChar(_In_count_(StringLength) const wchar_t *lpString, _In_ wchar_t UCharacater, _In_ size_t StringLength) noexcept {
+	size_t FindChar(_In_count_(StringLength) const wchar_t *lpString, _In_ wchar_t UCharacater, _In_ size_t StringLength) noexcept {
 
 		for (size_t i = 0; i < StringLength; i++) {
 			if (lpString[i] == UCharacater) {
@@ -100,15 +100,15 @@ struct Algorithms {
 	}
 
 	// # This Function Converts all UPPERCASE Letters to lowercase Letters #
-	static void ToLower(_Inout_count_(StringLength) char *lpString, _In_ size_t StringLength) noexcept {
+	void ToLower(_Inout_count_(StringLength) char *lpString, _In_ size_t StringLength) noexcept {
 
 		// * Start of Upper Case Letters *
-		static constexpr int16_t StartUpper = 65;
+		constexpr int16_t StartUpper = 65;
 		// * End of Upper Case Letters *
-		static constexpr int16_t EndUpper = 98;
+		constexpr int16_t EndUpper = 98;
 
 		// * Difference Between Lower and Upper Case Letters *
-		static constexpr int16_t Difference = 32;
+		constexpr int16_t Difference = 32;
 
 		for (size_t i = 0; i < StringLength; i++) {
 			if (lpString[i] >= StartUpper && lpString[i] <= EndUpper) {
@@ -119,15 +119,15 @@ struct Algorithms {
 	}
 
 	// # This Function Converts all lowercase Letters to UPPERCASE Letters #
-	static void ToUpper(_Inout_count_(StringLength) char *lpString, _In_ size_t StringLength) noexcept {
+	void ToUpper(_Inout_count_(StringLength) char *lpString, _In_ size_t StringLength) noexcept {
 
 		// * Start of Lower Case Letters *
-		static constexpr int16_t StartLower = 97;
+		constexpr int16_t StartLower = 97;
 		// * End of Lower Case Letters *
-		static constexpr int16_t EndLower = 122;
+		constexpr int16_t EndLower = 122;
 
 		// * Difference Between Lower and Upper Case Letters *
-		static constexpr int16_t Difference = 32;
+		constexpr int16_t Difference = 32;
 
 		for (size_t i = 0; i < StringLength; i++) {
 			if (lpString[i] >= StartLower && lpString[i] <= EndLower) {
@@ -138,7 +138,7 @@ struct Algorithms {
 	}
 
 	// # This Function Encrypt Text To ASCII Value Code #
-	static std::string EncryptText(_In_ const std::string &String) {
+	std::string EncryptText(_In_ const std::string &String) {
 
 		std::string EncryptedString;
 
@@ -154,7 +154,7 @@ struct Algorithms {
 	}
 
 	// # This Function Decrypt Text From ASCII Value Code #
-	static std::string DecryptText(_In_ const std::string &EncryptedString) {
+	std::string DecryptText(_In_ const std::string &EncryptedString) {
 
 		std::string DecryptedString;
 		std::istringstream sstream(EncryptedString);
@@ -180,7 +180,7 @@ struct Algorithms {
 
 	}
 
-	static std::wstring StringToWideString(const std::string &String) {
+	std::wstring StringToWideString(const std::string &String) {
 
 		std::wstring WideString;
 		WideString.reserve(String.length() + 1);
@@ -195,13 +195,13 @@ struct Algorithms {
 
 
 	// # This Function Get WINAPI Error Message From System Resources #
-	static std::string GetWINAPIErrorMessage(_In_ uint32_t ErrorCode) {
+	std::string GetWINAPIErrorMessage(_In_ uint32_t ErrorCode) {
 
 		//----------------------------------------
 		// Error Message Bufffer
 
-		static constexpr size_t MAX_CHAR_STRING = 410U;
-		CHAR ErrorMessageBuffer[MAX_CHAR_STRING] = { 0 };
+		static constexpr size_t MAX_CHAR_STRING = 256U;
+		char ErrorMessageBuffer[MAX_CHAR_STRING] = { 0 };
 		
 		//----------------------------------------
 
@@ -213,7 +213,7 @@ struct Algorithms {
 			FORMAT_MESSAGE_IGNORE_INSERTS |
 			FORMAT_MESSAGE_MAX_WIDTH_MASK;
 
-		DWORD ErrorMessageLength = FormatMessageA(
+		uint32_t ErrorMessageLength = FormatMessageA(
 			Flags, nullptr, ErrorCode, LANG_USER_DEFAULT,
 			ErrorMessageBuffer, ARRAYSIZE(ErrorMessageBuffer) - 1, nullptr);
 		
@@ -222,7 +222,8 @@ struct Algorithms {
 		if (ErrorMessageLength == 0) {
 			return "Error Code: " + std::to_string(ErrorCode) + " - Unknown Error";
 		} else {
-			return "Error Code: " + std::to_string(ErrorCode) + " - " + std::string(ErrorMessageBuffer, ErrorMessageLength - 1);
+			return "Error Code: " + std::to_string(ErrorCode) + " - " +
+				std::string(ErrorMessageBuffer, ErrorMessageLength - 1);
 		}
 
 	}
@@ -231,11 +232,11 @@ struct Algorithms {
 	/// <param name="Bitmap">Handle To Bitmap</param>
 	/// <param name="FilePath">File Path With ".bmp" Extension</param>
 	/// <param name="BitmapSize">Bitmap Size in Pixels</param>
-	static void SaveBitmapToFile(_In_ HBITMAP Bitmap, _In_ const std::string &FilePath, _In_ SIZE BitmapSize) {
+	void SaveBitmapToFile(_In_ HBITMAP Bitmap, _In_ const std::string &FilePath, _In_ SIZE BitmapSize) {
 		
 		std::ofstream image;
 
-		static constexpr WORD BM = 0x4D42; // * ASCII 'B' = 0x42 / 'M' = 0x4D *
+		constexpr WORD BM = 0x4D42; // * ASCII 'B' = 0x42 / 'M' = 0x4D *
 		const DWORD BitmapSizeCXxCY = BitmapSize.cx * BitmapSize.cy; // * Bitmap Size [cx x cy] *
 
 		BITMAPFILEHEADER bmfheader = { 0 };
