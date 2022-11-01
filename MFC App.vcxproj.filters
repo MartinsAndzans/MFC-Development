@@ -27,20 +27,8 @@
     <Filter Include="Headers\Windows">
       <UniqueIdentifier>{3b62336c-8e30-47f8-ae80-71c708cf04a3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\Windows\GdiPlus">
-      <UniqueIdentifier>{b3ce8bc1-1515-44d8-b1c5-74f261f81c14}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Headers\Windows\Types">
       <UniqueIdentifier>{1576f9de-37a5-4d34-bd74-fb6d7d8783a7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\Windows\Graphics">
-      <UniqueIdentifier>{85c1649a-f428-4a91-a4be-1b48dd314d87}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\Windows\Graphics\TStatic">
-      <UniqueIdentifier>{eab8dbf5-2066-4cf5-ae97-d9723f3894c9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\Windows\Graphics\TButton">
-      <UniqueIdentifier>{2672532b-fb4f-480c-8835-115a7cfb13df}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -71,9 +59,6 @@
     <ClInclude Include="MFCApp.h">
       <Filter>MFC App</Filter>
     </ClInclude>
-    <ClInclude Include="GdiPlus.h">
-      <Filter>Headers\Windows\GdiPlus</Filter>
-    </ClInclude>
     <ClInclude Include="Algorithms.h">
       <Filter>Headers\Alghorithms</Filter>
     </ClInclude>
@@ -87,6 +72,9 @@
       <Filter>Headers\Windows</Filter>
     </ClInclude>
     <ClInclude Include="Windows\SystemError.h">
+      <Filter>Headers\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\GdiPlus.h">
       <Filter>Headers\Windows</Filter>
     </ClInclude>
   </ItemGroup>

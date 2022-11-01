@@ -159,9 +159,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Algorithms.h" />
-    <ClInclude Include="GdiPlus.h" />
     <ClInclude Include="MFCApp.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Windows\GdiPlus.h" />
     <ClInclude Include="Windows\SystemClipboard.h" />
     <ClInclude Include="Windows\SystemError.h" />
     <ClInclude Include="Windows\Types\ColorU.h" />

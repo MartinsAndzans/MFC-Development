@@ -10,8 +10,9 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include <string>
 #include <assert.h>
 
-#include "gdiplus.h"
 #include "Algorithms.h"
+
+#include "Windows/GdiPlus.h"
 #include "Windows/SystemError.h"
 #include "Windows/SystemClipboard.h"
 
@@ -294,7 +295,7 @@ protected:
 
 				INT PrevBKMode = ItemDC.SetBkMode(TRANSPARENT);
 				HGDIOBJ PrevFont = ItemDC.SelectObject(m_Font_SegoeUI);
-				COLORREF PrevColor = ItemDC.SetTextColor(Windows::ColorU(Windows::ColorU::Enum::Yellow));
+				COLORREF PrevColor = ItemDC.SetTextColor(ColorU(ColorU::Enum::Yellow));
 
 				CSize TextSize;
 				GetTextExtentPoint32(ItemDC, StaticText, StaticText.GetLength(), &TextSize);
@@ -324,7 +325,7 @@ protected:
 		// Spawn Gates
 		if (m_Gates.size() <= 6) {
 			
-			INT32 HoleLocation = rand() % (m_CanvasSize.height - HoleHeight) - 10;
+			int32_t HoleLocation = rand() % (m_CanvasSize.height - HoleHeight) - 10;
 			
 			if (m_Gates.empty()) {
 
@@ -340,8 +341,8 @@ protected:
 				const Gate &last = m_Gates.back();
 
 				m_Gates.push_back({
-					Rect4I(Vertex2I(last.rcTop.Location.x + last.rcTop.Size.width + Space, 0), Size2I(GateWidth, HoleLocation)),
-					Rect4I(Vertex2I(last.rcBottom.Location.x + last.rcTop.Size.width + Space, HoleLocation + HoleHeight),
+					Rect4I(Vertex2I(last.rcTop.Right() + Space, 0), Size2I(GateWidth, HoleLocation)),
+					Rect4I(Vertex2I(last.rcBottom.Right() + Space, HoleLocation + HoleHeight),
 						Size2I(GateWidth, m_CanvasSize.height - HoleLocation - HoleHeight)),
 					false
 				});
@@ -477,23 +478,23 @@ protected:
 			HGDIOBJ PrevBitmap = MemoryDC.SelectObject(Bitmap);
 
 			// Clear Screen
-			Windows::ColorU LightBlueColor(Windows::ColorU::Enum::LightBlue);
+			ColorU LightBlueColor(ColorU::Enum::LightBlue);
 			CBrush SkyBlueBrush(LightBlueColor);
 			GdiPlus::FillRectangle(MemoryDC, Vertex2I(), m_CanvasSize, SkyBlueBrush);
 			
-			std::array<Windows::ColorU, 3> PlayerColors = {
-				Windows::ColorU::Enum::Yellow,
-				Windows::ColorU::Enum::LightYellow,
-				Windows::ColorU::Enum::Yellow
+			std::array<ColorU, 3> PlayerColors = {
+				ColorU::Enum::Yellow,
+				ColorU::Enum::LightYellow,
+				ColorU::Enum::Yellow
 			};
 
 			// Draw Player
 			GdiPlus::FillGradientH(MemoryDC, m_Player.rcPlayer.Location, m_Player.rcPlayer.Size, PlayerColors);
 
-			std::array<Windows::ColorU, 3> GateColors = {
-				Windows::ColorU::Enum::DarkGreen,
-				Windows::ColorU::Enum::Green,
-				Windows::ColorU::Enum::DarkGreen
+			std::array<ColorU, 3> GateColors = {
+				ColorU::Enum::DarkGreen,
+				ColorU::Enum::Green,
+				ColorU::Enum::DarkGreen
 			};
 
 			// Draw Gates
@@ -509,7 +510,7 @@ protected:
 			WindowDC.StretchBlt(Client.Left(), Client.Top(), Client.Size.width, Client.Size.height,
 				&MemoryDC, 0, 0, m_CanvasSize.width, m_CanvasSize.height, SRCCOPY);
 
-			GdiPlus::DrawText(WindowDC, { 4, 4 }, { 200, 40 }, L"Flappy Bird", m_Font_SegoeUI, Windows::ColorU::Enum::Yellow);
+			GdiPlus::DrawText(WindowDC, { 4, 4 }, { 200, 40 }, L"Flappy Bird", m_Font_SegoeUI, ColorU::Enum::Yellow);
 
 			// WinErr Error(0x0000212F);
 			// std::string FormatErrorMessage = SystemError(0x0000212F).Format("Error Code: $(ErrorCode) - $(ErrorMessage)");
@@ -530,7 +531,7 @@ protected:
 			Windows::SystemClipboard::ErrorCode u32ErrorCode = Windows::SystemClipboard::SetClipboardText(m_hWnd, _T("Text To Clipboard"));
 			
 			// std::string JSON = GateColors[1].ToString();
-			GdiPlus::DrawText(WindowDC, { 4, 38 }, { 600, 40 }, Windows::SystemError(0x212F).Format("Error Code: $(ErrorCode) - $(ErrorMessage)"), m_Font_SegoeUI, Windows::ColorU::Enum::Yellow);
+			GdiPlus::DrawText(WindowDC, { 4, 38 }, { 600, 40 }, Windows::SystemError(0x212F).Format("Error Code: $(ErrorCode) - $(ErrorMessage)"), m_Font_SegoeUI, ColorU::Enum::Yellow);
 
 			MemoryDC.SelectObject(PrevBitmap);
 		

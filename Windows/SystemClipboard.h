@@ -1,5 +1,5 @@
-#ifndef __CLIPBOARD_H__
-#define __CLIPBOARD_H__
+#ifndef __SYSTEM_CLIPBOARD_H__
+#define __SYSTEM_CLIPBOARD_H__
 
 /*****************************************
 *                                        *
@@ -225,4 +225,4 @@ namespace Windows {
 
 }
 
-#endif // !__CLIPBOARD_H__
+#endif // !__SYSTEM_CLIPBOARD_H__
